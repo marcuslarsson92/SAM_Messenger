@@ -1,5 +1,5 @@
-package model;
-import model.Message;
+package entity;
+import entity.Message;
 
 public interface MessageListener {
     void message(Message message);

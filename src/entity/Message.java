@@ -1,6 +1,4 @@
-import model.User;
-import control.Controller;
-import control.*;
+package entity;
 
 import java.util.Date;
 

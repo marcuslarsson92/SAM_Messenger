@@ -6,21 +6,24 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class Server extends Thread {
+public class Server {
     private int port;
+    private ServerSocket serverSocket;
 
     public Server(int port) {
-        this.port = port;
+        try {
+            serverSocket = new ServerSocket(port);
+        } catch (Exception e) {}
     }
 
-    public void run () {
-        Socket socket = null;
-        try (ServerSocket serverSocket = new ServerSocket(port)) {
-            while (true) {
-                socket = serverSocket.accept();
-                new ClientHandler(socket);
-            }
-        } catch (Exception e) {}
+    public void start () {
+        while (true) {
+            try {
+                Socket clientSocket = serverSocket.accept();
+                System.out.println("Client connected: " + clientSocket.getInetAddress().getHostAddress());
+                new Thread(new ClientHandler(clientSocket)).start();
+            } catch (Exception e) {}
+        }
     }
 
     private class ClientHandler extends Thread {
@@ -34,5 +37,9 @@ public class Server extends Thread {
             ois = new ObjectInputStream(socket.getInputStream());
         }
 
+    }
+    public static void main(String[] args) {
+        Server server = new Server(5000);
+        server.start();
     }
 }

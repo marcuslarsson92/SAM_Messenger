@@ -1,9 +1,8 @@
-package control;
+package entity;
 
 import java.util.ArrayList;
-import static java.lang.Thread.interrupted;
-import model.*;
-public class MessageManager extends Thread{
+
+public class MessageManager extends Thread {
     private Buffer<Message> messageBuffer;
     private ArrayList<MessageListener> messageListeners = new ArrayList<>();
 
