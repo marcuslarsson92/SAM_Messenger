@@ -2,6 +2,7 @@ package client;
 
 import model.User;
 import model.Message;
+import server.Server;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -57,5 +58,9 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void main(String[] args) {
+        ClientView clientView = new ClientView();
     }
 }

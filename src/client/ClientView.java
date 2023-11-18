@@ -55,7 +55,7 @@ public class ClientView extends JFrame implements ActionListener {
     private Icon[] loadIcons() {
         Icon[] icons = new Icon[4];
         for (int i = 0; i < icons.length; i++) {
-            String filename = "pictures/icon" + (i + 1) + ".jpeg";
+            String filename = "/icons/icon" + (i + 1) + ".png";
             ImageIcon icon = new ImageIcon(getClass().getResource(filename));
             icons[i] = icon;
         }
@@ -65,7 +65,7 @@ public class ClientView extends JFrame implements ActionListener {
     private void connectToServer() {
         String name = nameField.getText();
         Icon icon = (Icon) iconBox.getSelectedItem();
-        User user = new User(name, icon);
+        User user = new User(name, "/res/icons/icon1");
         client = new Client(user);
         client.connectToServer();
         List<User> userList = client.getUserList();

@@ -23,7 +23,7 @@ public class ChatView extends JFrame implements ActionListener, MessageListener 
         this.user = client.getUser();
         this.chatPartner = chatPartner;
         this.client = client;
-        client.addMessageListener(this);
+        //client.addMessageListener(this);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout());
 
@@ -50,6 +50,7 @@ public class ChatView extends JFrame implements ActionListener, MessageListener 
     }
 
     private void sendMessage() {
+        /*
         String text = messageField.getText();
         if (!text.isEmpty()) {
             Message message = new Message(user, chatPartner, text);
@@ -61,6 +62,8 @@ public class ChatView extends JFrame implements ActionListener, MessageListener 
             }
             messageField.setText("");
         }
+
+         */
     }
 
     @Override
@@ -74,14 +77,20 @@ public class ChatView extends JFrame implements ActionListener, MessageListener 
 
     @Override
     public void onMessageReceived(Message message) {
+        /*
         if ((message.getFromUser().equals(user) && message.getToUser().equals(chatPartner))
                 || (message.getFromUser().equals(chatPartner) && message.getToUser().equals(user))) {
             addMessage(message);
         }
+
+         */
     }
 
     private void addMessage(Message message) {
+        /*
         String text = message.getFromUser().getName() + ": " + message.getText() + "\n";
         messageArea.append(text);
+        */
     }
+
 }
