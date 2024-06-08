@@ -1,62 +1,76 @@
 package server;
 
+import model.Message;
 import model.User;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.Socket;
 
-public class ClientHandler extends Thread {
-    private Socket clientSocket;
+import java.io.*;
+import java.net.Socket;
+import java.util.List;
+
+public class ClientHandler implements Runnable {
+    private Socket socket;
     private Server server;
-    private BufferedReader in;
-    private PrintWriter out;
+    private ObjectInputStream in;
+    private ObjectOutputStream out;
     private User user;
 
-    public ClientHandler(Socket clientSocket, Server server) {
-        this.clientSocket = clientSocket;
+    public ClientHandler(Socket socket, Server server) {
+        this.socket = socket;
         this.server = server;
+    }
+
+    @Override
+    public void run() {
+        try {
+            out = new ObjectOutputStream(socket.getOutputStream());
+            in = new ObjectInputStream(socket.getInputStream());
+
+            user = (User) in.readObject();
+            server.addUser(user);
+            server.deliverUndeliveredMessages(user);
+
+            Object obj;
+            while ((obj = in.readObject()) != null) {
+                if (obj instanceof Message) {
+                    Message message = (Message) obj;
+                    message.setDeliveredTime(null); // Reset delivered time for new delivery
+                    server.sendMessage(message);
+                }
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            server.removeUser(user);
+            closeConnection();
+        }
+    }
+
+    public void sendUserList(List<User> userList) {
+        try {
+            out.writeObject(userList);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void sendMessage(Message message) {
+        try {
+            message.setDeliveredTime(java.time.LocalDateTime.now());
+            out.writeObject(message);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public User getUser() {
         return user;
     }
 
-    public void sendMessage(User sender, String message) {
-        out.println(sender.getName() + ": " + message);
-    }
-
-    @Override
-    public void run() {
+    void closeConnection() {
         try {
-            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            out = new PrintWriter(clientSocket.getOutputStream(), true);
-
-            out.println("Enter your name:");
-            String name = in.readLine();
-            out.println("Choose your icon:");
-            String iconName = in.readLine();
-
-            user = new User(name, iconName);
-            out.println("Welcome, " + user.getName() + "!");
-
-            while (true) {
-                String input = in.readLine();
-                if (input == null) {
-                    break;
-                }
-                server.broadcastMessage(this, user, input);
-            }
+            socket.close();
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            try {
-                clientSocket.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            server.removeClient(this);
         }
     }
 }

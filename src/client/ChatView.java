@@ -1,7 +1,6 @@
 package client;
 
 import model.Message;
-import model.MessageListener;
 import model.User;
 
 import javax.swing.*;
@@ -9,88 +8,99 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
-public class ChatView extends JFrame implements ActionListener, MessageListener {
-    private JTextArea messageArea;
-    private JTextField messageField;
+public class ChatView extends JFrame {
+    private JTextArea chatArea;
+    private JTextField inputField;
     private JButton sendButton;
-    private User user;
-    private User chatPartner;
+    private JList<String> userList;
+    private DefaultListModel<String> userListModel;
     private Client client;
+    private List<User> users;
 
-    public ChatView(Client client, User chatPartner) {
-        super("Chat with " + chatPartner.getName());
-        this.user = client.getUser();
-        this.chatPartner = chatPartner;
+    public ChatView(Client client) {
         this.client = client;
-        //client.addMessageListener(this);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLayout(new BorderLayout());
+        this.users = new ArrayList<>();
+        client.setMessageListener(message -> {
+            String msg = message.getSender().getName() + ": " + message.getText();
+            if (message.getImage() != null) {
+                msg += " [Image attached]";
+            }
+            chatArea.append(msg + "\n");
+        });
 
-        messageArea = new JTextArea();
-        messageArea.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(messageArea);
-        add(scrollPane, BorderLayout.CENTER);
+        client.setUserListListener(updatedUsers -> {
+            users = updatedUsers;
+            updateUserList();
+        });
 
-        JPanel messagePanel = new JPanel(new BorderLayout());
-        messageField = new JTextField();
-        messageField.addActionListener(this);
-        messagePanel.add(messageField, BorderLayout.CENTER);
-
-        sendButton = new JButton("Send");
-        sendButton.setEnabled(false);
-        sendButton.addActionListener(this);
-        messagePanel.add(sendButton, BorderLayout.EAST);
-
-        add(messagePanel, BorderLayout.SOUTH);
-
-        setSize(400, 300);
+        setTitle("Chat Application");
+        setSize(600, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setVisible(true);
+
+        chatArea = new JTextArea();
+        chatArea.setEditable(false);
+        JScrollPane chatScrollPane = new JScrollPane(chatArea);
+
+        inputField = new JTextField();
+        sendButton = new JButton("Send");
+
+        sendButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sendMessage();
+            }
+        });
+
+        userListModel = new DefaultListModel<>();
+        userList = new JList<>(userListModel);
+        JScrollPane userScrollPane = new JScrollPane(userList);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(inputField, BorderLayout.CENTER);
+        panel.add(sendButton, BorderLayout.EAST);
+
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, userScrollPane, chatScrollPane);
+        splitPane.setDividerLocation(150);
+
+        add(splitPane, BorderLayout.CENTER);
+        add(panel, BorderLayout.SOUTH);
     }
 
     private void sendMessage() {
-        /*
-        String text = messageField.getText();
-        if (!text.isEmpty()) {
-            Message message = new Message(user, chatPartner, text);
+        String text = inputField.getText();
+        if (!text.isEmpty() && userList.getSelectedValue() != null) {
             try {
-                client.sendMessage(user, message);
-                addMessage(message);
+                User receiver = getUserByName(userList.getSelectedValue());
+                List<User> receivers = new ArrayList<>();
+                receivers.add(receiver);
+                Message message = new Message(client.getUser(), receivers, text, null);
+                client.sendMessage(message);
+                inputField.setText("");
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            messageField.setText("");
-        }
-
-         */
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == messageField) {
-            sendMessage();
-        } else if (e.getSource() == sendButton) {
-            sendMessage();
         }
     }
 
-    @Override
-    public void onMessageReceived(Message message) {
-        /*
-        if ((message.getFromUser().equals(user) && message.getToUser().equals(chatPartner))
-                || (message.getFromUser().equals(chatPartner) && message.getToUser().equals(user))) {
-            addMessage(message);
+    private User getUserByName(String name) {
+        for (User user : users) {
+            if (user.getName().equals(name)) {
+                return user;
+            }
         }
-
-         */
+        return null;
     }
 
-    private void addMessage(Message message) {
-        /*
-        String text = message.getFromUser().getName() + ": " + message.getText() + "\n";
-        messageArea.append(text);
-        */
+    private void updateUserList() {
+        SwingUtilities.invokeLater(() -> {
+            userListModel.clear();
+            for (User user : users) {
+                userListModel.addElement(user.getName());
+            }
+        });
     }
-
 }

@@ -2,34 +2,50 @@ package model;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
+import javax.swing.Icon;
 
 public class Message implements Serializable {
-    private final User sender;
-    private final User recipient;
-    private final String content;
-    private final LocalDateTime timestamp;
+    private User sender;
+    private List<User> receivers;
+    private String text;
+    private Icon image;
+    private LocalDateTime receivedTime;
+    private LocalDateTime deliveredTime;
 
-    public Message(User sender, User recipient, String content) {
+    public Message(User sender, List<User> receivers, String text, Icon image) {
         this.sender = sender;
-        this.recipient = recipient;
-        this.content = content;
-        this.timestamp = LocalDateTime.now();
+        this.receivers = receivers;
+        this.text = text;
+        this.image = image;
+        this.receivedTime = LocalDateTime.now();
     }
 
     public User getSender() {
         return sender;
     }
 
-    public User getRecipient() {
-        return recipient;
+    public List<User> getReceivers() {
+        return receivers;
     }
 
-    public String getContent() {
-        return content;
+    public String getText() {
+        return text;
     }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
+    public Icon getImage() {
+        return image;
+    }
+
+    public LocalDateTime getReceivedTime() {
+        return receivedTime;
+    }
+
+    public LocalDateTime getDeliveredTime() {
+        return deliveredTime;
+    }
+
+    public void setDeliveredTime(LocalDateTime deliveredTime) {
+        this.deliveredTime = deliveredTime;
     }
 }
-

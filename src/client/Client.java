@@ -1,12 +1,11 @@
 package client;
 
-import model.User;
 import model.Message;
-import server.Server;
+import model.MessageListener;
+import model.User;
 
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import javax.swing.*;
+import java.io.*;
 import java.net.Socket;
 import java.util.List;
 
@@ -15,52 +14,63 @@ public class Client {
     private Socket socket;
     private ObjectInputStream in;
     private ObjectOutputStream out;
+    private MessageListener messageListener;
+    private UserListListener userListListener;
 
-    public Client(User user) {
+    public Client(User user, String serverAddress, int serverPort) throws IOException {
         this.user = user;
+        this.socket = new Socket(serverAddress, serverPort);
+        this.out = new ObjectOutputStream(socket.getOutputStream());
+        this.in = new ObjectInputStream(socket.getInputStream());
+
+        // Send user information to server
+        out.writeObject(user);
+
+        // Start listening for messages
+        new Thread(new Listener()).start();
     }
 
     public User getUser() {
         return user;
     }
 
-    public void connectToServer() {
-        try {
-            socket = new Socket("localhost", 5000);
-            out = new ObjectOutputStream(socket.getOutputStream());
-            out.writeObject(user);
-            in = new ObjectInputStream(socket.getInputStream());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void sendMessage(Message message) throws IOException {
+        out.writeObject(message);
     }
 
-    public List<User> getUserList() {
-        try {
-            return (List<User>) in.readObject();
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public void setMessageListener(MessageListener messageListener) {
+        this.messageListener = messageListener;
     }
 
-    public void sendMessage(User recipient, String message) {
-        try {
-            out.writeObject(new Message(user, recipient, message));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void setUserListListener(UserListListener userListListener) {
+        this.userListListener = userListListener;
     }
 
-    public void disconnect() {
-        try {
-            socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+    private class Listener implements Runnable {
+        @Override
+        public void run() {
+            try {
+                Object obj;
+                while ((obj = in.readObject()) != null) {
+                    if (obj instanceof Message) {
+                        if (messageListener != null) {
+                            messageListener.onMessageReceived((Message) obj);
+                        }
+                    } else if (obj instanceof List) {
+                        if (userListListener != null) {
+                            userListListener.onUserListUpdated((List<User>) obj);
+                        }
+                    }
+                }
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    socket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-    }
-
-    public static void main(String[] args) {
-        ClientView clientView = new ClientView();
     }
 }

@@ -1,58 +1,120 @@
 package server;
+
+import model.Message;
 import model.User;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
+
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import java.util.concurrent.*;
 
 public class Server {
-    private List<ClientHandler> clients = new ArrayList<>();
-    private ServerView serverView;
-    private int port;
+    private final int port;
+    private Set<ClientHandler> clientHandlers = ConcurrentHashMap.newKeySet();
+    private Map<String, User> connectedUsers = new ConcurrentHashMap<>();
+    private Queue<Message> undeliveredMessages = new ConcurrentLinkedQueue<>();
+    private boolean running = true;
 
     public Server(int port) {
         this.port = port;
-        serverView = new ServerView(this);
     }
 
     public void start() {
-        try {
-            ServerSocket serverSocket = new ServerSocket(port);
-            while (true) {
-                Socket clientSocket = serverSocket.accept();
-                ClientHandler clientHandler = new ClientHandler(clientSocket, this);
-                clients.add(clientHandler);
-                clientHandler.start();
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            logMessage("Server started on port " + port);
+            while (running) {
+                try {
+                    Socket socket = serverSocket.accept();
+                    ClientHandler clientHandler = new ClientHandler(socket, this);
+                    clientHandlers.add(clientHandler);
+                    new Thread(clientHandler).start();
+                } catch (IOException e) {
+                    if (running) {
+                        logMessage("Error accepting connection: " + e.getMessage());
+                    }
+                }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            logMessage("Server error: " + e.getMessage());
         }
     }
 
-    public void removeClient(ClientHandler clientHandler) {
-        clients.remove(clientHandler);
-    }
-
-    public List<User> getUserList() {
-        List<User> userList = new ArrayList<>();
-        for (ClientHandler clientHandler : clients) {
-            userList.add(clientHandler.getUser());
+    public void stop() throws IOException {
+        running = false;
+        for (ClientHandler clientHandler : clientHandlers) {
+            clientHandler.closeConnection();
         }
-        return userList;
+        logMessage("Server stopped");
     }
 
-    public void broadcastMessage(ClientHandler sender, User recipient, String message) {
-        for (ClientHandler clientHandler : clients) {
-            if (clientHandler.getUser().equals(recipient)) {
-                clientHandler.sendMessage(sender.getUser(), message);
-                break;
+    public synchronized void broadcastUserUpdate() {
+        List<User> userList = new ArrayList<>(connectedUsers.values());
+        for (ClientHandler clientHandler : clientHandlers) {
+            clientHandler.sendUserList(userList);
+        }
+    }
+
+    public synchronized void addUser(User user) {
+        connectedUsers.put(user.getName(), user);
+        logMessage("User connected: " + user.getName());
+        broadcastUserUpdate();
+    }
+
+    public synchronized void removeUser(User user) {
+        connectedUsers.remove(user.getName());
+        logMessage("User disconnected: " + user.getName());
+        broadcastUserUpdate();
+    }
+
+    public synchronized void sendMessage(Message message) {
+        boolean delivered = false;
+        for (User receiver : message.getReceivers()) {
+            ClientHandler handler = getClientHandler(receiver);
+            if (handler != null) {
+                handler.sendMessage(message);
+                delivered = true;
             }
         }
+        if (!delivered) {
+            undeliveredMessages.add(message);
+            logMessage("Message from " + message.getSender().getName() + " to " +
+                    message.getReceivers().toString() + " queued");
+        } else {
+            logMessage("Message from " + message.getSender().getName() + " to " +
+                    message.getReceivers().toString() + " delivered");
+        }
+    }
+
+    private ClientHandler getClientHandler(User user) {
+        for (ClientHandler handler : clientHandlers) {
+            if (handler.getUser().getName().equals(user.getName())) {
+                return handler;
+            }
+        }
+        return null;
+    }
+
+    public void deliverUndeliveredMessages(User user) {
+        Iterator<Message> iterator = undeliveredMessages.iterator();
+        while (iterator.hasNext()) {
+            Message message = iterator.next();
+            if (message.getReceivers().contains(user)) {
+                ClientHandler handler = getClientHandler(user);
+                if (handler != null) {
+                    handler.sendMessage(message);
+                    iterator.remove();
+                    logMessage("Queued message delivered to " + user.getName());
+                }
+            }
+        }
+    }
+
+    public void logMessage(String message) {
+        System.out.println(message);
     }
 
     public static void main(String[] args) {
-        Server server = new Server(5000);
+        Server server = new Server(12345);
         server.start();
     }
 }

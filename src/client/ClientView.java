@@ -6,93 +6,64 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
+import java.io.IOException;
 
-public class ClientView extends JFrame implements ActionListener {
-    private JTextField nameField;
-    private JComboBox<Icon> iconBox;
-    private JList<User> userList;
-    private DefaultListModel<User> listModel;
-    private JButton chatButton;
-    private User selectedUser;
-    private Client client;
+public class ClientView extends JFrame {
+    private JComboBox<String> userComboBox;
+    private JButton connectButton;
+    private JLabel statusLabel;
 
     public ClientView() {
-        super("Messenger");
+        setTitle("Client Connection");
+        setSize(400, 200);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new BorderLayout());
-
-        JPanel userPanel = new JPanel(new BorderLayout());
-
-        nameField = new JTextField("Enter your name");
-        nameField.addActionListener(this);
-        userPanel.add(nameField, BorderLayout.NORTH);
-
-        Icon[] icons = loadIcons();
-        iconBox = new JComboBox<>(icons);
-        iconBox.addActionListener(this);
-        userPanel.add(iconBox, BorderLayout.CENTER);
-
-        listModel = new DefaultListModel<>();
-        userList = new JList<>(listModel);
-        userList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        userList.addListSelectionListener(e -> updateSelectedUser());
-        JScrollPane scrollPane = new JScrollPane(userList);
-        userPanel.add(scrollPane, BorderLayout.SOUTH);
-
-        chatButton = new JButton("Start Chat");
-        chatButton.setEnabled(false);
-        chatButton.addActionListener(this);
-        add(chatButton, BorderLayout.SOUTH);
-
-        add(userPanel, BorderLayout.WEST);
-
-        setSize(400, 300);
         setLocationRelativeTo(null);
-        setVisible(true);
+
+        String[] userNames = {"Alexandra", "Simon", "Marcus", "Johan"};
+        userComboBox = new JComboBox<>(userNames);
+        connectButton = new JButton("Connect");
+        statusLabel = new JLabel("Not connected");
+
+        connectButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                connect();
+            }
+        });
+
+        JPanel panel = new JPanel(new GridLayout(4, 1));
+        panel.add(new JLabel("Choose user:"));
+        panel.add(userComboBox);
+        panel.add(connectButton);
+        panel.add(statusLabel);
+
+        add(panel);
     }
 
-    private Icon[] loadIcons() {
-        Icon[] icons = new Icon[4];
-        for (int i = 0; i < icons.length; i++) {
-            String filename = "/icons/icon" + (i + 1) + ".png";
-            ImageIcon icon = new ImageIcon(getClass().getResource(filename));
-            icons[i] = icon;
+    private void connect() {
+        String username = (String) userComboBox.getSelectedItem();
+        String iconPath = "res/icons/" + username.toLowerCase() + ".png";
+
+        if (username != null) {
+            User user = new User(username, iconPath);
+            try {
+                Client client = new Client(user, "localhost", 12345);
+                ChatView chatView = new ChatView(client);
+                chatView.setVisible(true);
+                this.setVisible(false);
+            } catch (IOException e) {
+                e.printStackTrace();
+                statusLabel.setText("Connection failed");
+            }
+        } else {
+            statusLabel.setText("Please choose a user");
         }
-        return icons;
     }
 
-    private void connectToServer() {
-        String name = nameField.getText();
-        Icon icon = (Icon) iconBox.getSelectedItem();
-        User user = new User(name, "/res/icons/icon1");
-        client = new Client(user);
-        client.connectToServer();
-        List<User> userList = client.getUserList();
-        for (User u : userList) {
-            listModel.addElement(u);
-        }
-        chatButton.setEnabled(true);
-    }
-
-    private void updateSelectedUser() {
-        selectedUser = userList.getSelectedValue();
-    }
-
-    private void startChat() {
-        if (selectedUser != null) {
-            ChatView chatView = new ChatView(client, selectedUser);
-            chatView.setVisible(true);
-        }
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == nameField || e.getSource() == iconBox) {
-            connectToServer();
-        } else if (e.getSource() == chatButton) {
-            startChat();
-        }
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            ClientView view = new ClientView();
+            view.setVisible(true);
+        });
     }
 }
-

@@ -1,23 +1,23 @@
-package client;
+package model;
 
-import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class Buffer<T> {
-    private LinkedList<T> buffer = new LinkedList<T>();
+public class Buffer {
+    private ConcurrentLinkedQueue<Message> messageQueue;
 
-    public synchronized void put(T obj) {
-        buffer.addLast(obj);
-        notifyAll();
+    public Buffer() {
+        messageQueue = new ConcurrentLinkedQueue<>();
     }
 
-    public synchronized T get() throws InterruptedException {
-        while(buffer.isEmpty()) {
-            wait();
-        }
-        return buffer.removeFirst();
+    public void addMessage(Message message) {
+        messageQueue.add(message);
     }
 
-    public int size() {
-        return buffer.size();
+    public Message getMessage() {
+        return messageQueue.poll();
+    }
+
+    public boolean isEmpty() {
+        return messageQueue.isEmpty();
     }
 }
