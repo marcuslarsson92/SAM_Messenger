@@ -19,6 +19,7 @@ public class ChatView extends JFrame {
     private DefaultListModel<String> userListModel;
     private Client client;
     private List<User> users;
+    private JLabel loggedInAsLabel;
 
     public ChatView(Client client) {
         this.client = client;
@@ -41,6 +42,7 @@ public class ChatView extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
+        loggedInAsLabel = new JLabel("Logged in as: " + client.getUser().getName());
         chatArea = new JTextArea();
         chatArea.setEditable(false);
         JScrollPane chatScrollPane = new JScrollPane(chatArea);
@@ -63,8 +65,12 @@ public class ChatView extends JFrame {
         panel.add(inputField, BorderLayout.CENTER);
         panel.add(sendButton, BorderLayout.EAST);
 
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, userScrollPane, chatScrollPane);
-        splitPane.setDividerLocation(150);
+        JPanel leftPanel = new JPanel(new BorderLayout());
+        leftPanel.add(loggedInAsLabel, BorderLayout.NORTH);
+        leftPanel.add(userScrollPane, BorderLayout.CENTER);
+
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, chatScrollPane);
+        splitPane.setDividerLocation(200);
 
         add(splitPane, BorderLayout.CENTER);
         add(panel, BorderLayout.SOUTH);
@@ -98,8 +104,11 @@ public class ChatView extends JFrame {
     private void updateUserList() {
         SwingUtilities.invokeLater(() -> {
             userListModel.clear();
+            userListModel.addElement("Online:");
             for (User user : users) {
-                userListModel.addElement(user.getName());
+                if (!user.getName().equals(client.getUser().getName())) {
+                    userListModel.addElement(user.getName());
+                }
             }
         });
     }
