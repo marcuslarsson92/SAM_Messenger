@@ -36,7 +36,7 @@ public class ChatView extends JFrame {
             updateUserList();
         });
 
-        setTitle("Chat Application");
+        setTitle("Chat Application | " + client.getUser().getName());
         setSize(600, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
