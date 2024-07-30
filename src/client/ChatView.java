@@ -32,14 +32,14 @@ public class ChatView extends JFrame {
             chatArea.append(msg + "\n");
         });
 
-        
+
         client.setUserListListener(updatedUsers -> {
             users = updatedUsers;
             updateUserList();
         });
 
 
-        setTitle("Chat Application | " + client.getUser().getName());
+        setTitle("Chat Application | Logged in as: " + client.getUser().getName());
         setSize(600, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -83,6 +83,7 @@ public class ChatView extends JFrame {
                 Message message = new Message(client.getUser(), receivers, text, null);
                 client.sendMessage(message);
                 inputField.setText("");
+                chatArea.append(message.getSender().getName() + ": " + message.getText() + "\n");
             } catch (IOException e) {
                 e.printStackTrace();
             }
