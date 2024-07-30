@@ -9,9 +9,10 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 
 public class ClientView extends JFrame {
-    private JComboBox<String> userComboBox;
     private JButton connectButton;
     private JLabel statusLabel;
+    private JTextField userNameField;
+    private String userName;
 
     public ClientView() {
         setTitle("Client Connection");
@@ -19,33 +20,36 @@ public class ClientView extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        String[] userNames = {"Alexandra", "Simon", "Marcus", "Johan"};
-        userComboBox = new JComboBox<>(userNames);
+        userNameField = new JTextField();
         connectButton = new JButton("Connect");
         statusLabel = new JLabel("Not connected");
 
         connectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                connect();
+                userName = userNameField.getText();
+                if (!userName.isEmpty()) {
+                    connect();
+                } else {
+                    statusLabel.setText("Please enter a username");
+                }
+
             }
         });
 
         JPanel panel = new JPanel(new GridLayout(4, 1));
-        panel.add(new JLabel("Choose user:"));
-        panel.add(userComboBox);
+        panel.add(new JLabel("Please enter username:"));
+        panel.add(userNameField);
         panel.add(connectButton);
         panel.add(statusLabel);
 
         add(panel);
     }
-
     private void connect() {
-        String username = (String) userComboBox.getSelectedItem();
-        String iconPath = "res/icons/" + username.toLowerCase() + ".png";
 
-        if (username != null) {
-            User user = new User(username, iconPath);
+        if (userName != null) {
+            String iconPath = "res/icons/" + userName + ".png";
+            User user = new User(userName, iconPath);
             try {
                 Client client = new Client(user, "localhost", 12345);
                 ChatView chatView = new ChatView(client);
