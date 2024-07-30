@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ChatView extends JFrame {
     private JTextArea chatArea;
@@ -31,10 +32,12 @@ public class ChatView extends JFrame {
             chatArea.append(msg + "\n");
         });
 
+        
         client.setUserListListener(updatedUsers -> {
             users = updatedUsers;
             updateUserList();
         });
+
 
         setTitle("Chat Application | " + client.getUser().getName());
         setSize(600, 400);
@@ -95,11 +98,14 @@ public class ChatView extends JFrame {
         return null;
     }
 
+
     private void updateUserList() {
         SwingUtilities.invokeLater(() -> {
             userListModel.clear();
             for (User user : users) {
-                userListModel.addElement(user.getName());
+                if(!user.getName().equals(client.getUser().getName())) {
+                    userListModel.addElement(user.getName());
+                }
             }
         });
     }
