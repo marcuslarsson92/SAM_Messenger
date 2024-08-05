@@ -7,22 +7,22 @@ import java.io.Serializable;
 
 public class User implements Serializable {
     private String name;
-    private Icon icon;
+    private String icon;
 
-    public User(String name, String iconPath) {
+    public User(String name, String icon) {
         this.name = name;
-        this.icon = createIcon(iconPath);
+        this.icon = icon;
     }
 
     public String getName() {
         return name;
     }
 
-    public Icon getIcon() {
-        return icon;
+    public ImageIcon getIcon() {
+        return (ImageIcon) createIcon(icon);
     }
 
-    private Icon createIcon(String iconPath) {
+    public Icon createIcon(String iconPath) {
         ImageIcon imageIcon = new ImageIcon(iconPath);
 
         if (imageIcon.getImageLoadStatus() == MediaTracker.COMPLETE) {
