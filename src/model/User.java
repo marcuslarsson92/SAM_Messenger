@@ -22,6 +22,14 @@ public class User implements Serializable {
         return (ImageIcon) createIcon(icon);
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+
     public Icon createIcon(String iconPath) {
         ImageIcon imageIcon = new ImageIcon(iconPath);
 

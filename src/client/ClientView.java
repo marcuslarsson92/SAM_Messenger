@@ -44,7 +44,7 @@ public class ClientView extends JFrame {
         iconPanel.add(iconLabel);
 
         JPanel iconButtonPanel = new JPanel();
-        iconButtonPanel.setLayout(new FlowLayout()); 
+        iconButtonPanel.setLayout(new FlowLayout());
         iconButtons = new JRadioButton[iconPaths.length];
         ButtonGroup group = new ButtonGroup();
 
@@ -90,6 +90,7 @@ public class ClientView extends JFrame {
         for (int i = 0; i < iconButtons.length; i++) {
             if (iconButtons[i].isSelected()) {
                 selectedIcon = iconPaths[i];
+
                 break;
             }
         }
@@ -103,6 +104,8 @@ public class ClientView extends JFrame {
         System.out.println("Selected Icon: " + selectedIcon);
 
         User user = new User(username, selectedIcon);
+        user.setName(username);
+        user.setIcon(selectedIcon);
         try {
             Client client = new Client(user, "localhost", 12345);
             System.out.println("Client: " + username + selectedIcon);

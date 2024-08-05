@@ -20,7 +20,7 @@ public class ServerView extends JFrame {
         setTitle("Server Log");
         setSize(500, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+        //setLocationRelativeTo(null);
 
         logArea = new JTextArea();
         logArea.setEditable(false);
