@@ -8,10 +8,12 @@ import java.io.Serializable;
 public class User implements Serializable {
     private String name;
     private String icon;
+    private boolean online;
 
     public User(String name, String icon) {
         this.name = name;
         this.icon = icon;
+        this.online = false;
     }
 
     public String getName() {

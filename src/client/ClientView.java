@@ -109,8 +109,10 @@ public class ClientView extends JFrame {
         try {
             Client client = new Client(user, "localhost", 12345);
             System.out.println("Client: " + username + selectedIcon);
-            ChatView chatView = new ChatView(client);
-            chatView.setVisible(true);
+            //ChatView chatView = new ChatView(client);
+            //chatView.setVisible(true);
+            ChatViewWindow chatViewWindow = new ChatViewWindow(client);
+            chatViewWindow.setVisible(true);
             this.setVisible(false);
 
 
