@@ -18,6 +18,8 @@ public class Server {
     private Queue<Message> undeliveredMessages = new ConcurrentLinkedQueue<>();
     private boolean running = true;
     private static final Logger logger = Logger.getLogger(Server.class.getName());
+    private List<User> allUsers = new ArrayList<>(); // Lista över alla registrerade användare
+
 
     public Server(int port) {
         this.port = port;
@@ -71,15 +73,22 @@ public class Server {
     }
 
     public synchronized void addUser(User user) {
+        if (!allUsers.contains(user)) {
+            allUsers.add(user);
+        }
         connectedUsers.put(user.getName(), user);
         logMessage("User connected: " + user.getName());
         broadcastUserUpdate();
+
     }
 
     public synchronized void removeUser(User user) {
         connectedUsers.remove(user.getName());
         logMessage("User disconnected: " + user.getName());
         broadcastUserUpdate();
+    }
+    public synchronized List<User> getAllUsers() {
+        return new ArrayList<>(allUsers);
     }
 
     public synchronized void sendMessage(Message message) {
