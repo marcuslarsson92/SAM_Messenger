@@ -1,5 +1,8 @@
 package server;
 
+
+import client.ClientView;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
@@ -9,6 +12,7 @@ public class ServerView extends JFrame {
     private JTextArea logArea;
     private JButton startButton;
     private JButton stopButton;
+    private JButton newClientButton;
     private Server server;
     private Thread serverThread;
 
@@ -16,7 +20,7 @@ public class ServerView extends JFrame {
         setTitle("Server Log");
         setSize(500, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+        //setLocationRelativeTo(null);
 
         logArea = new JTextArea();
         logArea.setEditable(false);
@@ -26,15 +30,24 @@ public class ServerView extends JFrame {
         stopButton = new JButton("Stop Server");
         stopButton.setEnabled(false);
 
+        newClientButton = new JButton("New Client");
+
         startButton.addActionListener(e -> startServer());
         stopButton.addActionListener(e -> stopServer());
+        newClientButton.addActionListener(e -> newClient());
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(startButton);
         buttonPanel.add(stopButton);
+        buttonPanel.add(newClientButton);
 
         add(scrollPane, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void newClient() {
+        ClientView clientView = new ClientView();
+        clientView.setVisible(true);
     }
 
     public void logMessage(String message) {
@@ -70,6 +83,7 @@ public class ServerView extends JFrame {
         startButton.setEnabled(true);
         stopButton.setEnabled(false);
     }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

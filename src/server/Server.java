@@ -7,6 +7,9 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.logging.FileHandler;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class Server {
     private final int port;
@@ -14,9 +17,11 @@ public class Server {
     private Map<String, User> connectedUsers = new ConcurrentHashMap<>();
     private Queue<Message> undeliveredMessages = new ConcurrentLinkedQueue<>();
     private boolean running = true;
+    private static final Logger logger = Logger.getLogger(Server.class.getName());
 
     public Server(int port) {
         this.port = port;
+        setupLogger();
     }
 
     public void start() {
@@ -36,6 +41,17 @@ public class Server {
             }
         } catch (IOException e) {
             logMessage("Server error: " + e.getMessage());
+        }
+    }
+
+    private void setupLogger() {
+        try {
+            FileHandler fileHandler = new FileHandler("server_log.txt", true);
+            fileHandler.setFormatter(new SimpleFormatter());
+            logger.addHandler(fileHandler);
+            logger.setUseParentHandlers(false);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
