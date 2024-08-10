@@ -1,4 +1,3 @@
-
 package client;
 
 import model.User;
@@ -19,6 +18,8 @@ public class ClientView extends JFrame {
     };
     private JButton connectButton;
 
+    // NYTT: Knapp för att skapa en gruppchatt
+    private JButton createGroupChatButton;
 
     public ClientView() {
         setTitle("Client Connection");
@@ -64,9 +65,13 @@ public class ClientView extends JFrame {
         connectButton = new JButton("Connect");
         connectButton.addActionListener(e -> handleLogin());
 
+        // NYTT: Initialisering av gruppchattknappen
+        createGroupChatButton = new JButton("Create Group Chat"); // NYTT: Skapa en ny knapp för att initiera en gruppchatt
+        createGroupChatButton.addActionListener(e -> handleCreateGroupChat()); // NYTT: Lägg till en ActionListener för att hantera gruppchattens skapande
 
         JPanel bottomPanel = new JPanel(new GridLayout(2, 1));
         bottomPanel.add(connectButton);
+        bottomPanel.add(createGroupChatButton); // NYTT: Lägg till gruppchattknappen till bottenpanelen
 
         add(bottomPanel, BorderLayout.SOUTH);
     }
@@ -109,6 +114,34 @@ public class ClientView extends JFrame {
         }
     }
 
+    // NYTT: Metod för att hantera skapandet av en gruppchatt
+    private void handleCreateGroupChat() {
+        String username = usernameField.getText().trim();
+        String selectedIcon = null;
+
+        for (int i = 0; i < iconButtons.length; i++) {
+            if (iconButtons[i].isSelected()) {
+                selectedIcon = iconPaths[i];
+                break;
+            }
+        }
+
+        if (username.isEmpty() || selectedIcon == null) {
+            JOptionPane.showMessageDialog(this, "Please enter a username and select an icon.");
+            return;
+        }
+
+        User user = new User(username, selectedIcon);
+        try {
+            Client client = new Client(user, "localhost", 12345);
+            GroupChatCreationView groupChatView = new GroupChatCreationView(client); // NYTT: Öppnar ett nytt fönster för att skapa en gruppchatt
+            groupChatView.setVisible(true);
+            this.setVisible(false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             ClientView view = new ClientView();
@@ -116,9 +149,3 @@ public class ClientView extends JFrame {
         });
     }
 }
-
-
-
-
-
-

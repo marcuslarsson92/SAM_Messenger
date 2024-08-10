@@ -20,7 +20,6 @@ public class Server {
     private static final Logger logger = Logger.getLogger(Server.class.getName());
     private List<User> allUsers = new ArrayList<>(); // Lista över alla registrerade användare
 
-
     public Server(int port) {
         this.port = port;
         setupLogger();
@@ -79,7 +78,6 @@ public class Server {
         connectedUsers.put(user.getName(), user);
         logMessage("User connected: " + user.getName());
         broadcastUserUpdate();
-
     }
 
     public synchronized void removeUser(User user) {
@@ -87,47 +85,50 @@ public class Server {
         logMessage("User disconnected: " + user.getName());
         broadcastUserUpdate();
     }
+
     public synchronized List<User> getAllUsers() {
         return new ArrayList<>(allUsers);
     }
 
+    // Uppdaterad metod för att skicka meddelanden, hanterar nu gruppmeddelanden
     public synchronized void sendMessage(Message message) {
         boolean delivered = false;
-        for (User receiver : message.getReceivers()) {
-            ClientHandler handler = getClientHandler(receiver);
+        for (User receiver : message.getReceivers()) { // Loopa genom alla mottagare av meddelandet
+            ClientHandler handler = getClientHandler(receiver); // Hämta ClientHandler för varje mottagare
             if (handler != null) {
-                handler.sendMessage(message);
-                delivered = true;
+                handler.sendMessage(message); // Skicka meddelandet till mottagaren
+                delivered = true; // Indikerar att meddelandet levererats
             }
         }
-        if (!delivered) {
-            undeliveredMessages.add(message);
+        if (!delivered) { // Om inget meddelande kunde levereras
+            undeliveredMessages.add(message); // Lägg till meddelandet i kön för odelade meddelanden
             logMessage("Message from " + message.getSender().getName() + " to " +
-                    message.getReceivers().toString() + " queued");
+                    message.getReceivers().toString() + " queued"); // Logga att meddelandet köades
         } else {
             logMessage("Message from " + message.getSender().getName() + " to " +
-                    message.getReceivers().toString() + " delivered");
+                    message.getReceivers().toString() + " delivered"); // Logga att meddelandet levererades
         }
     }
 
+    // Metod för att hämta ClientHandler för en specifik användare
     private ClientHandler getClientHandler(User user) {
-        for (ClientHandler handler : clientHandlers) {
-            if (handler.getUser().getName().equals(user.getName())) {
-                return handler;
+        for (ClientHandler handler : clientHandlers) { // Iterera genom alla ClientHandlers
+            if (handler.getUser().getName().equals(user.getName())) { // Kontrollera om användarnamnet matchar
+                return handler; // Returnera rätt ClientHandler
             }
         }
-        return null;
+        return null; // Returnera null om ingen matchande ClientHandler hittas
     }
 
     public void deliverUndeliveredMessages(User user) {
         Iterator<Message> iterator = undeliveredMessages.iterator();
         while (iterator.hasNext()) {
             Message message = iterator.next();
-            if (message.getReceivers().contains(user)) {
+            if (message.getReceivers().contains(user)) { // Kontrollera om mottagaren finns i listan över mottagare
                 ClientHandler handler = getClientHandler(user);
                 if (handler != null) {
                     handler.sendMessage(message);
-                    iterator.remove();
+                    iterator.remove(); // Ta bort meddelandet från kön efter att det levererats
                     logMessage("Queued message delivered to " + user.getName());
                 }
             }
