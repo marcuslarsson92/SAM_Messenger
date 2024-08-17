@@ -55,12 +55,15 @@ public class ClientView extends JFrame {
     }
 
     private void openSortCriteriaDialog() {
-        String[] options = {"Time", "Sender", "Receiver"};
+        String[] options = {"All", "Time", "Sender", "Receiver"};  // Lade till "All" som ett alternativ
         String criteria = (String) JOptionPane.showInputDialog(this, "Select sorting criteria:", "Sort Logs",
                 JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
 
         if (criteria != null) {
             switch (criteria) {
+                case "All":
+                    openLogViewer("All", null, null, null);  // Öppna log viewer utan att sortera
+                    break;
                 case "Time":
                     openDateFilterDialog(criteria);
                     break;
@@ -135,13 +138,15 @@ public class ClientView extends JFrame {
         logFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
         List<String> logLines = readLogFile();
-        Collections.reverse(logLines);
-
         JTextArea logArea = new JTextArea();
         logArea.setEditable(false);
-        logLines.forEach(line -> logArea.append(line + "\n"));
 
-        sortLog(logLines, criteria, startDate, endDate, user, logArea);
+        if (!criteria.equals("All")) {
+            Collections.reverse(logLines);
+            sortLog(logLines, criteria, startDate, endDate, user, logArea);
+        }else{
+            logLines.forEach(line -> logArea.append(line + "\n"));
+        }
 
         logFrame.add(new JScrollPane(logArea), BorderLayout.CENTER);
         logFrame.setVisible(true);
