@@ -6,6 +6,7 @@ import model.User;
 import java.io.*;
 import java.net.Socket;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ClientHandler implements Runnable {
     private Socket socket;
@@ -57,6 +58,15 @@ public class ClientHandler implements Runnable {
         try {
             message.setDeliveredTime(java.time.LocalDateTime.now());
             out.writeObject(message);
+            String senderUsername = message.getSender().getName();
+
+            // Extract the receivers' usernames and join them into a single string
+            String receiverUsernames = message.getReceivers().stream()
+                    .map(User::getName)
+                    .collect(Collectors.joining(", "));
+
+            // Log the message
+            ChatLogger.logMessage(senderUsername, receiverUsernames, message.getText());
         } catch (IOException e) {
             e.printStackTrace();
         }

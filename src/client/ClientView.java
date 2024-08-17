@@ -1,16 +1,27 @@
 package client;
-
 import model.User;
+import org.jdatepicker.impl.JDatePanelImpl;
+import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.UtilDateModel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.List;
 
 public class ClientView extends JFrame {
     private JComboBox<String> userComboBox;
     private JButton connectButton;
+    private JButton viewLogsButton;
     private JLabel statusLabel;
 
     public ClientView() {
@@ -23,7 +34,6 @@ public class ClientView extends JFrame {
         userComboBox = new JComboBox<>(userNames);
         connectButton = new JButton("Connect");
         statusLabel = new JLabel("Not connected");
-
         connectButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -37,9 +47,56 @@ public class ClientView extends JFrame {
         panel.add(connectButton);
         panel.add(statusLabel);
 
+        viewLogsButton = new JButton("View Chat Logs");
+        viewLogsButton.addActionListener(e -> openSortCriteriaDialog());
+        panel.add(viewLogsButton);
+
         add(panel);
     }
 
+    private void openSortCriteriaDialog() {
+        String[] options = {"Time", "Sender", "Receiver"};
+        String criteria = (String) JOptionPane.showInputDialog(this, "Select sorting criteria:", "Sort Logs",
+                JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
+
+        if (criteria != null) {
+            switch (criteria) {
+                case "Time":
+                    openDateFilterDialog(criteria);
+                    break;
+                case "Sender":
+                    openSenderReceiverFilterDialog(criteria, "Enter Sender:");
+                    break;
+                case "Receiver":
+                    openSenderReceiverFilterDialog(criteria, "Enter Receiver:");
+                    break;
+            }
+        }
+    }
+
+    private void openDateFilterDialog(String criteria) {
+        JTextField startDateField = new JTextField(10);
+        JTextField endDateField = new JTextField(10);
+
+        JButton startDateButton = new JButton("Choose Start Date");
+        startDateButton.addActionListener(e -> startDateField.setText(showDatePicker()));
+
+        JButton endDateButton = new JButton("Choose End Date");
+        endDateButton.addActionListener(e -> endDateField.setText(showDatePicker()));
+
+        JPanel panel = new JPanel();
+        panel.add(new JLabel("Start Date:"));
+        panel.add(startDateField);
+        panel.add(startDateButton);
+        panel.add(new JLabel("End Date:"));
+        panel.add(endDateField);
+        panel.add(endDateButton);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, "Select Date Range", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            openLogViewer(criteria, startDateField.getText(), endDateField.getText(), null);
+        }
+    }
     private void connect() {
         String username = (String) userComboBox.getSelectedItem();
         String iconPath = "res/icons/" + username.toLowerCase() + ".png";
@@ -57,6 +114,151 @@ public class ClientView extends JFrame {
             }
         } else {
             statusLabel.setText("Please choose a user");
+        }
+    }
+
+    private void openSenderReceiverFilterDialog(String criteria, String labelText) {
+        JTextField userField = new JTextField(20);
+        JPanel panel = new JPanel();
+        panel.add(new JLabel(labelText));
+        panel.add(userField);
+
+        int result = JOptionPane.showConfirmDialog(this, panel, "Enter " + criteria, JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            openLogViewer(criteria, null, null, userField.getText());
+        }
+    }
+
+    private void openLogViewer(String criteria, String startDate, String endDate, String user) {
+        JFrame logFrame = new JFrame("Chat Logs");
+        logFrame.setSize(800, 600);
+        logFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+
+        List<String> logLines = readLogFile();
+        Collections.reverse(logLines);
+
+        JTextArea logArea = new JTextArea();
+        logArea.setEditable(false);
+        logLines.forEach(line -> logArea.append(line + "\n"));
+
+        sortLog(logLines, criteria, startDate, endDate, user, logArea);
+
+        logFrame.add(new JScrollPane(logArea), BorderLayout.CENTER);
+        logFrame.setVisible(true);
+    }
+
+    public void sortLog(List<String> logLines, String criteria, String startDate, String endDate, String user, JTextArea logArea) {
+        switch (criteria) {
+            case "Time":
+                logLines = filterByDate(logLines, startDate, endDate);
+                Collections.reverse(logLines);  // Visa senaste först
+                break;
+            case "Sender":
+                logLines = filterBySender(logLines, user);
+                break;
+            case "Receiver":
+                logLines = filterByReceiver(logLines, user);
+                break;
+        }
+
+        logArea.setText("");
+        logLines.forEach(line -> logArea.append(line + "\n"));
+    }
+
+    private List<String> filterByDate(List<String> logLines, String startDate, String endDate) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate start = startDate.isEmpty() ? LocalDate.MIN : LocalDate.parse(startDate, formatter);
+        LocalDate end = endDate.isEmpty() ? LocalDate.MAX : LocalDate.parse(endDate, formatter);
+
+        List<String> filtered = new ArrayList<>();
+        for (String line : logLines) {
+            String datePart = line.split("\\|")[0].trim().split(" ")[0]; // Extrahera datumet (yyyy-MM-dd)
+            LocalDate logDate = LocalDate.parse(datePart, formatter);
+            if (!logDate.isBefore(start) && !logDate.isAfter(end)) {
+                filtered.add(line);
+            }
+        }
+        return filtered;
+    }
+
+    private List<String> filterBySender(List<String> logLines, String sender) {
+        if (sender == null || sender.isEmpty()) return logLines;
+        List<String> filtered = new ArrayList<>();
+        for (String line : logLines) {
+            if (extractSender(line).equalsIgnoreCase(sender)) {
+                filtered.add(line);
+            }
+        }
+        return filtered;
+    }
+
+    private List<String> filterByReceiver(List<String> logLines, String receiver) {
+        if (receiver == null || receiver.isEmpty()) return logLines;
+        List<String> filtered = new ArrayList<>();
+        for (String line : logLines) {
+            if (extractReceiver(line).equalsIgnoreCase(receiver)) {
+                filtered.add(line);
+            }
+        }
+        return filtered;
+    }
+
+    private String extractSender(String logLine) {
+        return logLine.split("\\|")[1].trim().replace("From: ", "");
+    }
+
+    private String extractReceiver(String logLine) {
+        return logLine.split("\\|")[2].trim().replace("To: ", "");
+    }
+
+    public List<String> readLogFile() {
+        List<String> logLines = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader("chat_log.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                logLines.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return logLines;
+    }
+
+    private String showDatePicker() {
+        UtilDateModel model = new UtilDateModel();
+        Properties p = new Properties();
+        p.put("text.today", "Today");
+        p.put("text.month", "Month");
+        p.put("text.year", "Year");
+
+        JDatePanelImpl datePanel = new JDatePanelImpl(model, p);
+        JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
+
+        int result = JOptionPane.showConfirmDialog(null, datePicker, "Select Date", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            return datePicker.getJFormattedTextField().getText();
+        }
+        return "";
+    }
+
+    public class DateLabelFormatter extends JFormattedTextField.AbstractFormatter {
+
+        private String datePattern = "yyyy-MM-dd";
+        private SimpleDateFormat dateFormatter = new SimpleDateFormat(datePattern);
+
+        @Override
+        public Object stringToValue(String text) throws ParseException {
+            return dateFormatter.parseObject(text);
+        }
+
+        @Override
+        public String valueToString(Object value) throws ParseException {
+            if (value != null) {
+                Calendar cal = (Calendar) value;
+                return dateFormatter.format(cal.getTime());
+            }
+
+            return "";
         }
     }
 
