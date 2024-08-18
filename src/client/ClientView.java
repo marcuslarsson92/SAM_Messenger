@@ -13,7 +13,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
@@ -82,16 +82,16 @@ public class ClientView extends JFrame {
         JTextField endDateField = new JTextField(10);
 
         JButton startDateButton = new JButton("Choose Start Date");
-        startDateButton.addActionListener(e -> startDateField.setText(showDatePicker()));
+        startDateButton.addActionListener(e -> startDateField.setText(showDateTimePicker()));
 
         JButton endDateButton = new JButton("Choose End Date");
-        endDateButton.addActionListener(e -> endDateField.setText(showDatePicker()));
+        endDateButton.addActionListener(e -> endDateField.setText(showDateTimePicker()));
 
         JPanel panel = new JPanel();
-        panel.add(new JLabel("Start Date:"));
+        panel.add(new JLabel("Start Date (yyyy-MM-dd HH:mm:ss):"));
         panel.add(startDateField);
         panel.add(startDateButton);
-        panel.add(new JLabel("End Date:"));
+        panel.add(new JLabel("End Date (yyyy-MM-dd HH:mm:ss):"));
         panel.add(endDateField);
         panel.add(endDateButton);
 
@@ -100,6 +100,7 @@ public class ClientView extends JFrame {
             openLogViewer(criteria, startDateField.getText(), endDateField.getText(), null);
         }
     }
+
     private void connect() {
         String username = (String) userComboBox.getSelectedItem();
         String iconPath = "res/icons/" + username.toLowerCase() + ".png";
@@ -144,7 +145,7 @@ public class ClientView extends JFrame {
         if (!criteria.equals("All")) {
             Collections.reverse(logLines);
             sortLog(logLines, criteria, startDate, endDate, user, logArea);
-        }else{
+        } else {
             logLines.forEach(line -> logArea.append(line + "\n"));
         }
 
@@ -170,16 +171,16 @@ public class ClientView extends JFrame {
         logLines.forEach(line -> logArea.append(line + "\n"));
     }
 
-    private List<String> filterByDate(List<String> logLines, String startDate, String endDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate start = startDate.isEmpty() ? LocalDate.MIN : LocalDate.parse(startDate, formatter);
-        LocalDate end = endDate.isEmpty() ? LocalDate.MAX : LocalDate.parse(endDate, formatter);
+    private List<String> filterByDate(List<String> logLines, String startDateTime, String endDateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime start = startDateTime.isEmpty() ? LocalDateTime.MIN : LocalDateTime.parse(startDateTime, formatter);
+        LocalDateTime end = endDateTime.isEmpty() ? LocalDateTime.MAX : LocalDateTime.parse(endDateTime, formatter);
 
         List<String> filtered = new ArrayList<>();
         for (String line : logLines) {
-            String datePart = line.split("\\|")[0].trim().split(" ")[0]; // Extrahera datumet (yyyy-MM-dd)
-            LocalDate logDate = LocalDate.parse(datePart, formatter);
-            if (!logDate.isBefore(start) && !logDate.isAfter(end)) {
+            String dateTimePart = line.split("\\|")[0].trim(); // Extrahera hela tidstämpeln (yyyy-MM-dd HH:mm:ss)
+            LocalDateTime logDateTime = LocalDateTime.parse(dateTimePart, formatter);
+            if (!logDateTime.isBefore(start) && !logDateTime.isAfter(end)) {
                 filtered.add(line);
             }
         }
@@ -229,7 +230,7 @@ public class ClientView extends JFrame {
         return logLines;
     }
 
-    private String showDatePicker() {
+    private String showDateTimePicker() {
         UtilDateModel model = new UtilDateModel();
         Properties p = new Properties();
         p.put("text.today", "Today");
@@ -239,9 +240,32 @@ public class ClientView extends JFrame {
         JDatePanelImpl datePanel = new JDatePanelImpl(model, p);
         JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
 
-        int result = JOptionPane.showConfirmDialog(null, datePicker, "Select Date", JOptionPane.OK_CANCEL_OPTION);
+        // Skapa rullgardinsmenyer för timmar och minuter
+        JComboBox<String> hourComboBox = new JComboBox<>();
+        JComboBox<String> minuteComboBox = new JComboBox<>();
+        for (int i = 0; i < 24; i++) {
+            hourComboBox.addItem(String.format("%02d", i));
+        }
+        for (int i = 0; i < 60; i++) {
+            minuteComboBox.addItem(String.format("%02d", i));
+        }
+
+        JPanel timePanel = new JPanel();
+        timePanel.add(new JLabel("Hour:"));
+        timePanel.add(hourComboBox);
+        timePanel.add(new JLabel("Minute:"));
+        timePanel.add(minuteComboBox);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(datePicker, BorderLayout.CENTER);
+        panel.add(timePanel, BorderLayout.SOUTH);
+
+        int result = JOptionPane.showConfirmDialog(null, panel, "Select Date and Time", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
-            return datePicker.getJFormattedTextField().getText();
+            String selectedDate = datePicker.getJFormattedTextField().getText();
+            String selectedHour = (String) hourComboBox.getSelectedItem();
+            String selectedMinute = (String) minuteComboBox.getSelectedItem();
+            return selectedDate + " " + selectedHour + ":" + selectedMinute + ":00";
         }
         return "";
     }
@@ -262,7 +286,6 @@ public class ClientView extends JFrame {
                 Calendar cal = (Calendar) value;
                 return dateFormatter.format(cal.getTime());
             }
-
             return "";
         }
     }
