@@ -3,10 +3,13 @@ package client;
 import model.Message;
 import model.User;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
@@ -17,7 +20,9 @@ public class ChatWindow extends JFrame {
     private JButton sendButton;
     private Client client;
     private User receiver;
-
+    private JButton attachImageButton; // Knapp för att bifoga bild
+    private BufferedImage attachedImage;
+/*
     public ChatWindow(Client client, User receiver) {
         this.client = client;
         this.receiver = receiver;
@@ -32,6 +37,7 @@ public class ChatWindow extends JFrame {
         JScrollPane chatScrollPane = new JScrollPane(chatArea);
 
         inputField = new JTextField();
+        attachImageButton = new JButton("Attach Image");
         sendButton = new JButton("Send");
 
         sendButton.addActionListener(new ActionListener() {
@@ -40,14 +46,63 @@ public class ChatWindow extends JFrame {
                 sendMessage();
             }
         });
+        attachImageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                attachImage();
+            }
+        });
 
         JPanel panel = new JPanel(new BorderLayout());
         panel.add(inputField, BorderLayout.CENTER);
         panel.add(sendButton, BorderLayout.EAST);
+        panel.add(attachImageButton);
 
         add(chatScrollPane, BorderLayout.CENTER);
         add(panel, BorderLayout.SOUTH);
     }
+
+ */
+public ChatWindow(Client client, User receiver) {
+    this.client = client;
+    this.receiver = receiver;
+
+    setTitle("Chat with " + receiver.getName());
+    setSize(400, 400);
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+    chatArea = new JTextArea();
+    chatArea.setEditable(false);
+    chatArea.setLineWrap(true);
+    chatArea.setWrapStyleWord(true);
+    add(new JScrollPane(chatArea), BorderLayout.CENTER);
+
+    JPanel panel = new JPanel();
+    inputField = new JTextField(20);
+    sendButton = new JButton("Send");
+    attachImageButton = new JButton("Attach Image");  // Knapp för att bifoga bild
+
+    panel.add(inputField);
+    panel.add(sendButton);
+    panel.add(attachImageButton);  // Lägg till knappen i GUI:t
+    add(panel, BorderLayout.SOUTH);
+
+    // Lyssnare för att skicka ett meddelande
+    sendButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            sendMessage();
+        }
+    });
+
+    // Lyssnare för att bifoga en bild
+    attachImageButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            attachImage();
+        }
+    });
+}
 
     private void sendMessage() {
         String text = inputField.getText();
@@ -64,8 +119,133 @@ public class ChatWindow extends JFrame {
             }
         }
     }
+    private void attachImage() {
+        JFileChooser fileChooser = new JFileChooser();
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            try {
+                attachedImage = ImageIO.read(file);
+                JOptionPane.showMessageDialog(this, "Image attached successfully!");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Failed to attach image: " + ex.getMessage());
+            }
+        }
+    }
 
     public void receiveMessage(Message message) {
-        chatArea.append(message.getSender().getName() + ": " + message.getText() + "\n");
+        //chatArea.append(message.getSender().getName() + ": " + message.getText() + "\n");
+
+        String text = message.getText();
+        chatArea.append("You: " + text + "\n");
+        if (message.getImage() != null) {
+            // Visa någon indikation om att en bild är bifogad. Mer avancerat GUI kan visa bilden.
+            chatArea.append("[Image attached]\n");
+        }
+    }
+
+}
+
+
+/*
+
+import model.Message;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import javax.imageio.ImageIO;
+
+public class ChatWindow extends JFrame {
+    private JTextArea chatArea;
+    private JTextField inputField;
+    private JButton sendButton;
+    private JButton attachImageButton; // Knapp för att bifoga bild
+    private BufferedImage attachedImage;
+
+    public ChatWindow() {
+        setTitle("Chat Window");
+        setSize(400, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        chatArea = new JTextArea();
+        chatArea.setEditable(false);
+        chatArea.setLineWrap(true);
+        chatArea.setWrapStyleWord(true);
+        add(new JScrollPane(chatArea), BorderLayout.CENTER);
+
+        JPanel panel = new JPanel();
+        inputField = new JTextField(20);
+        sendButton = new JButton("Send");
+        attachImageButton = new JButton("Attach Image");  // Knapp för att bifoga bild
+
+        panel.add(inputField);
+        panel.add(sendButton);
+        panel.add(attachImageButton);  // Lägg till knappen i GUI:t
+        add(panel, BorderLayout.SOUTH);
+
+        // Lyssnare för att skicka ett meddelande
+        sendButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sendMessage();
+            }
+        });
+
+        // Lyssnare för att bifoga en bild
+        attachImageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                attachImage();
+            }
+        });
+    }
+
+    private void sendMessage() {
+        String text = inputField.getText();
+        Message message = new Message(text, attachedImage);
+        displayMessage(message);
+        inputField.setText("");
+        attachedImage = null;  // Reset image after sending
+    }
+
+    private void attachImage() {
+        JFileChooser fileChooser = new JFileChooser();
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            File file = fileChooser.getSelectedFile();
+            try {
+                attachedImage = ImageIO.read(file);
+                JOptionPane.showMessageDialog(this, "Image attached successfully!");
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Failed to attach image: " + ex.getMessage());
+            }
+        }
+    }
+
+    private void displayMessage(Message message) {
+        String text = message.getText();
+        chatArea.append("You: " + text + "\n");
+        if (message.getImage() != null) {
+            // Visa någon indikation om att en bild är bifogad. Mer avancerat GUI kan visa bilden.
+            chatArea.append("[Image attached]\n");
+            // För att visa bilden i JTextArea kan du använda en JLabel med en ImageIcon
+            ImageIcon icon = new ImageIcon(message.getImage());
+            chatArea.insertIcon(icon);
+            chatArea.append("\n"); // Ny rad efter bilden
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            ChatWindow chatWindow = new ChatWindow();
+            chatWindow.setVisible(true);
+        });
     }
 }
+
+ */
+

@@ -98,6 +98,8 @@ public class ClientView extends JFrame {
         }
 
         User user = new User(username, selectedIcon);
+        System.out.println("username: " + username + " selected icon: " + selectedIcon);
+
         try {
             Client client = new Client(user, "localhost", 12345);
             ChatView chatView = new ChatView(client);
