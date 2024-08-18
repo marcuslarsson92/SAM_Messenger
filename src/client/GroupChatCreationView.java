@@ -45,4 +45,25 @@ public class GroupChatCreationView extends JFrame {
 
         JPanel buttonPanel = new JPanel(new FlowLayout());
         buttonPanel.add(createButton);
-        buttonPanel.add(cancelB
+        buttonPanel.add(cancelButton);
+
+        add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private void handleCreateGroupChat() {
+        List<User> selectedUsers = userList.getSelectedValuesList(); // Hämta alla valda användare
+        if (selectedUsers.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please select at least one user for the group chat.");
+            return;
+        }
+
+        // Inkludera den inloggade användaren i gruppen
+        selectedUsers.add(client.getUser());
+
+        // Skapa ett nytt ChatView för gruppchatten
+        ChatView chatView = new ChatView(client, selectedUsers);
+        chatView.setVisible(true);
+
+        dispose(); // Stäng detta fönster efter att gruppchatten har skapats
+    }
+}
