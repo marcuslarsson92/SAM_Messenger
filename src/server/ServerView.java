@@ -7,6 +7,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import org.jdatepicker.impl.JDatePanelImpl;
+import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.UtilDateModel;
 
 public class ServerView extends JFrame {
     private JTextArea logArea;
@@ -21,6 +24,7 @@ public class ServerView extends JFrame {
         setSize(500, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //setLocationRelativeTo(null);
+        
 
         logArea = new JTextArea();
         logArea.setEditable(false);
