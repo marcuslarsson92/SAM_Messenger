@@ -22,6 +22,55 @@ public class ChatWindow extends JFrame {
     private User receiver;
     private JButton attachImageButton; // Knapp för att bifoga bild
     private BufferedImage attachedImage;
+
+
+    private File attachedImageFile;
+
+    public ChatWindow(Client client, User receiver) {
+        this.client = client;
+        this.receiver = receiver;
+
+        setTitle("Chat with " + receiver.getName());
+        setSize(400, 400);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        chatArea = new JTextArea();
+        chatArea.setEditable(false);
+        JScrollPane chatScrollPane = new JScrollPane(chatArea);
+
+        inputField = new JTextField();
+        attachImageButton = new JButton("Attach Image");
+        sendButton = new JButton("Send");
+
+        sendButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sendMessage();
+            }
+        });
+        attachImageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                attachImage();
+            }
+        });
+
+        // Använd en horisontell layout för panelen längst ner
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+
+        // Skapa en panel för knapparna med FlowLayout för att placera dem bredvid varandra
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(sendButton);
+        buttonPanel.add(attachImageButton);
+
+        bottomPanel.add(inputField, BorderLayout.CENTER);  // Text input field till vänster
+        bottomPanel.add(buttonPanel, BorderLayout.EAST);   // Knappar till höger
+
+        add(chatScrollPane, BorderLayout.CENTER);
+        add(bottomPanel, BorderLayout.SOUTH);
+    }
+
 /*
     public ChatWindow(Client client, User receiver) {
         this.client = client;
@@ -62,7 +111,10 @@ public class ChatWindow extends JFrame {
         add(panel, BorderLayout.SOUTH);
     }
 
+
  */
+
+    /*
 public ChatWindow(Client client, User receiver) {
     this.client = client;
     this.receiver = receiver;
@@ -82,6 +134,8 @@ public ChatWindow(Client client, User receiver) {
     sendButton = new JButton("Send");
     attachImageButton = new JButton("Attach Image");  // Knapp för att bifoga bild
 
+
+
     panel.add(inputField);
     panel.add(sendButton);
     panel.add(attachImageButton);  // Lägg till knappen i GUI:t
@@ -95,6 +149,13 @@ public ChatWindow(Client client, User receiver) {
         }
     });
 
+    attachImageButton = new JButton("Bifoga Bild");
+    attachImageButton.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            attachImage();
+        }
+    });
+
     // Lyssnare för att bifoga en bild
     attachImageButton.addActionListener(new ActionListener() {
         @Override
@@ -102,7 +163,11 @@ public ChatWindow(Client client, User receiver) {
             attachImage();
         }
     });
+
+
+
 }
+*/
 
     private void sendMessage() {
         String text = inputField.getText();
@@ -148,6 +213,7 @@ public ChatWindow(Client client, User receiver) {
     }
 
 }
+
 
 
 /*
