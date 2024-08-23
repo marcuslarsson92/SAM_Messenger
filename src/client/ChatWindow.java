@@ -107,16 +107,19 @@ public ChatWindow(Client client, User receiver) {
     private void sendMessage() {
         String text = inputField.getText();
         if (!text.isEmpty()) {
-            try {
-                List<User> receivers = new ArrayList<>();
-                receivers.add(receiver);
-                Message message = new Message(client.getUser(), receivers, text, null);
-                client.sendMessage(message);
-                chatArea.append("Me: " + text + "\n");
-                inputField.setText("");
-            } catch (IOException e) {
-                e.printStackTrace();
+            if(client.getUser() != receiver) {
+                try {
+                    List<User> receivers = new ArrayList<>();
+                    receivers.add(receiver);
+                    Message message = new Message(client.getUser(), receivers, text, null);
+                    client.sendMessage(message);
+                    chatArea.append(client.getUser().getName() + ": " + text + "\n");
+                    inputField.setText("");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+
         }
     }
     private void attachImage() {
@@ -137,7 +140,7 @@ public ChatWindow(Client client, User receiver) {
         //chatArea.append(message.getSender().getName() + ": " + message.getText() + "\n");
 
         String text = message.getText();
-        chatArea.append("You: " + text + "\n");
+        chatArea.append(message.getSender().getName() + ": " + text + "\n");
         if (message.getImage() != null) {
             // Visa någon indikation om att en bild är bifogad. Mer avancerat GUI kan visa bilden.
             chatArea.append("[Image attached]\n");
