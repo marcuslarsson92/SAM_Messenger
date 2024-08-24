@@ -32,16 +32,16 @@ public class User implements Serializable {
         this.icon = icon;
     }
 
-    public Icon createIcon(String iconPath) {
-        ImageIcon imageIcon = new ImageIcon(iconPath);
-
-        if (imageIcon.getImageLoadStatus() == MediaTracker.COMPLETE) {
-            return imageIcon;
+    private ImageIcon createIcon(String path) {
+        java.net.URL imgURL = getClass().getClassLoader().getResource(path);
+        if (imgURL != null) {
+            return new ImageIcon(imgURL);
         } else {
-            System.err.println("Error loading image: " + iconPath);
+            System.err.println("Error loading image: " + path);
             return null;
         }
     }
+
 
     @Override
     public boolean equals(Object obj) {
