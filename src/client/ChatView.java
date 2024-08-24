@@ -272,25 +272,6 @@ public class ChatView extends JFrame {
 
         add(leftPanel, BorderLayout.CENTER);
     }
-/*
-    private void sendMessage() {
-        String text = inputField.getText();
-        if (!text.isEmpty() && userList.getSelectedValue() != null) {
-            try {
-                User receiver = getUserByName(userList.getSelectedValue());
-                List<User> receivers = new ArrayList<>();
-                receivers.add(receiver);
-                Message message = new Message(client.getUser(), receivers, text, null);
-                client.sendMessage(message);
-                inputField.setText("");
-                openChatWindow(receiver.getName()).receiveMessage(message);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
- */
 
     private User getUserByName(String name) {
         for (User user : users) {
