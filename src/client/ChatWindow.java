@@ -71,103 +71,6 @@ public class ChatWindow extends JFrame {
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
-/*
-    public ChatWindow(Client client, User receiver) {
-        this.client = client;
-        this.receiver = receiver;
-
-        setTitle("Chat with " + receiver.getName());
-        setSize(400, 400);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-
-        chatArea = new JTextArea();
-        chatArea.setEditable(false);
-        JScrollPane chatScrollPane = new JScrollPane(chatArea);
-
-        inputField = new JTextField();
-        attachImageButton = new JButton("Attach Image");
-        sendButton = new JButton("Send");
-
-        sendButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                sendMessage();
-            }
-        });
-        attachImageButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                attachImage();
-            }
-        });
-
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.add(inputField, BorderLayout.CENTER);
-        panel.add(sendButton, BorderLayout.EAST);
-        panel.add(attachImageButton);
-
-        add(chatScrollPane, BorderLayout.CENTER);
-        add(panel, BorderLayout.SOUTH);
-    }
-
-
- */
-
-    /*
-public ChatWindow(Client client, User receiver) {
-    this.client = client;
-    this.receiver = receiver;
-
-    setTitle("Chat with " + receiver.getName());
-    setSize(400, 400);
-    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-    chatArea = new JTextArea();
-    chatArea.setEditable(false);
-    chatArea.setLineWrap(true);
-    chatArea.setWrapStyleWord(true);
-    add(new JScrollPane(chatArea), BorderLayout.CENTER);
-
-    JPanel panel = new JPanel();
-    inputField = new JTextField(20);
-    sendButton = new JButton("Send");
-    attachImageButton = new JButton("Attach Image");  // Knapp för att bifoga bild
-
-
-
-    panel.add(inputField);
-    panel.add(sendButton);
-    panel.add(attachImageButton);  // Lägg till knappen i GUI:t
-    add(panel, BorderLayout.SOUTH);
-
-    // Lyssnare för att skicka ett meddelande
-    sendButton.addActionListener(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            sendMessage();
-        }
-    });
-
-    attachImageButton = new JButton("Bifoga Bild");
-    attachImageButton.addActionListener(new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            attachImage();
-        }
-    });
-
-    // Lyssnare för att bifoga en bild
-    attachImageButton.addActionListener(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            attachImage();
-        }
-    });
-
-
-
-}
-*/
 
     private void sendMessage() {
         String text = inputField.getText();
@@ -201,6 +104,10 @@ public ChatWindow(Client client, User receiver) {
         }
     }
 
+
+
+
+
     public void receiveMessage(Message message) {
         //chatArea.append(message.getSender().getName() + ": " + message.getText() + "\n");
 
@@ -213,6 +120,9 @@ public ChatWindow(Client client, User receiver) {
     }
 
 }
+
+
+
 
 
 
@@ -316,5 +226,138 @@ public class ChatWindow extends JFrame {
     }
 }
 
- */
 
+/*
+import model.User;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class ChatWindow extends JFrame {
+    private Client client;
+    private User receiver;
+    private JTextPane chatPane;
+    private JTextField inputField;
+    private JButton attachImageButton;
+    private JButton sendButton;
+    private File attachedImageFile;
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
+
+    public ChatWindow(Client client, User receiver) {
+        this.client = client;
+        this.receiver = receiver;
+
+        setTitle("Chat with " + receiver.getName());
+        setSize(400, 400);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        chatPane = new JTextPane();
+        chatPane.setEditable(false);
+        JScrollPane chatScrollPane = new JScrollPane(chatPane);
+        chatScrollPane.setSize(350, 450);
+        chatScrollPane.setLocation(0, 30);
+        chatScrollPane.setBackground(Color.gray);
+        chatScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+
+        inputField = new JTextField();
+        attachImageButton = new JButton("Attach Image");
+        sendButton = new JButton("Send");
+
+        sendButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                sendMessage();
+            }
+        });
+
+        attachImageButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                attachImage();
+            }
+        });
+
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.add(sendButton);
+        buttonPanel.add(attachImageButton);
+
+        bottomPanel.add(inputField, BorderLayout.CENTER);
+        bottomPanel.add(buttonPanel, BorderLayout.EAST);
+
+        add(chatScrollPane, BorderLayout.CENTER);
+        add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+    private void sendMessage() {
+        try {
+            String formattedDate = dateFormat.format(new Date());
+
+            // Lägg till avsändarens namn och tid
+            chatPane.getDocument().insertString(chatPane.getDocument().getLength(), client.getUser().getName() + " " + formattedDate + ": ", null);
+
+            if (attachedImageFile != null) {
+                // Om en bild är bifogad, infoga den i chattfönstret
+                chatPane.insertIcon(new ImageIcon(attachedImageFile.getAbsolutePath()));
+                chatPane.getDocument().insertString(chatPane.getDocument().getLength(), "\n", null);
+                attachedImageFile = null; // Rensa den bifogade bilden
+            }
+
+            String message = inputField.getText();
+            if (!message.isEmpty()) {
+                chatPane.getDocument().insertString(chatPane.getDocument().getLength(), message + "\n", null);
+                inputField.setText("");
+            }
+
+            chatPane.setCaretPosition(chatPane.getDocument().getLength());
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    public void receiveMessage(String senderName, ImageIcon imageIcon, String textMessage) {
+        try {
+            String formattedDate = dateFormat.format(new Date());
+
+            // Lägg till avsändarens namn och tid
+            chatPane.getDocument().insertString(chatPane.getDocument().getLength(), senderName + " " + formattedDate + ": ", null);
+
+            if (imageIcon != null) {
+                // Visa mottagen bild
+                chatPane.insertIcon(imageIcon);
+                chatPane.getDocument().insertString(chatPane.getDocument().getLength(), "\n", null);
+            }
+
+            if (textMessage != null && !textMessage.isEmpty()) {
+                // Visa mottagen text
+                chatPane.getDocument().insertString(chatPane.getDocument().getLength(), textMessage + "\n", null);
+            }
+
+            chatPane.setCaretPosition(chatPane.getDocument().getLength());
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+    private void attachImage() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            attachedImageFile = fileChooser.getSelectedFile();
+            System.out.println("Vald bild: " + attachedImageFile.getAbsolutePath());
+        }
+    }
+
+
+}
+
+ */

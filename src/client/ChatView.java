@@ -214,8 +214,7 @@ package client;
         import java.util.Map;
 
 public class ChatView extends JFrame {
-    private JTextField inputField;
-    private JButton sendButton;
+
     private JList<String> userList;
 
     private DefaultListModel<String> userListModel;
@@ -243,8 +242,7 @@ public class ChatView extends JFrame {
         setLocationRelativeTo(null);
 
         loggedInAsLabel = new JLabel("Logged in as: " + client.getUser().getName());
-        inputField = new JTextField();
-        sendButton = new JButton("Send");
+
 
         userListModel = new DefaultListModel<>();
         userList = new JList<>(userListModel);
@@ -265,8 +263,7 @@ public class ChatView extends JFrame {
         JScrollPane userScrollPane = new JScrollPane(userList);
 
         JPanel panel = new JPanel(new BorderLayout());
-        panel.add(inputField, BorderLayout.CENTER);
-        panel.add(sendButton, BorderLayout.EAST);
+
 
         JPanel leftPanel = new JPanel(new BorderLayout());
         leftPanel.add(loggedInAsLabel, BorderLayout.NORTH);
@@ -275,7 +272,7 @@ public class ChatView extends JFrame {
 
         add(leftPanel, BorderLayout.CENTER);
     }
-
+/*
     private void sendMessage() {
         String text = inputField.getText();
         if (!text.isEmpty() && userList.getSelectedValue() != null) {
@@ -292,6 +289,8 @@ public class ChatView extends JFrame {
             }
         }
     }
+
+ */
 
     private User getUserByName(String name) {
         for (User user : users) {
