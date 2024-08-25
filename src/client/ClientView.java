@@ -1,12 +1,13 @@
-
 package client;
 
 import model.User;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Scanner;
 
 public class ClientView extends JFrame {
     private JTextField usernameField;
@@ -19,6 +20,8 @@ public class ClientView extends JFrame {
     };
     private JButton connectButton;
 
+    // Katalog för användarfiler
+    private final String userFilesDirectory = "res/userFiles/";
 
     public ClientView() {
         setTitle("Client Connection");
@@ -64,7 +67,6 @@ public class ClientView extends JFrame {
         connectButton = new JButton("Connect");
         connectButton.addActionListener(e -> handleLogin());
 
-
         JPanel bottomPanel = new JPanel(new GridLayout(2, 1));
         bottomPanel.add(connectButton);
 
@@ -97,6 +99,11 @@ public class ClientView extends JFrame {
             return;
         }
 
+        // Kontrollera om filen med samma användarnamn redan finns
+        File userFile = new File(userFilesDirectory + username + ".txt");
+        createUserFile(userFile, username, selectedIcon);
+
+
         User user = new User(username, selectedIcon);
         System.out.println("username: " + username + " selected icon: " + selectedIcon);
 
@@ -111,6 +118,44 @@ public class ClientView extends JFrame {
         }
     }
 
+    private void createUserFile(File userFile, String username, String selectedIcon) {
+        try {
+            // Kontrollera att katalogen finns, annars skapa den
+            File directory = new File(userFilesDirectory);
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
+            if (userFile.createNewFile()) {
+                System.out.println("File created: " + userFile.getName());
+                FileWriter writer = new FileWriter(userFile);
+                writer.write("Username: " + username + "\n");
+                writer.write("Iconpath: " + selectedIcon + "\n");
+                writer.write("Activity Log:\n");
+                writer.close();
+            } else {
+                loadUserFile(userFile);
+            }
+        } catch (IOException e) {
+            System.out.println("An error occurred while creating the file.");
+            e.printStackTrace();
+        }
+    }
+
+    private void loadUserFile(File userFile) {
+        try {
+            Scanner scanner = new Scanner(userFile);
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                System.out.println(line);
+            }
+            scanner.close();
+        } catch (IOException e) {
+            System.out.println("An error occurred while reading the file.");
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             ClientView view = new ClientView();
@@ -118,9 +163,3 @@ public class ClientView extends JFrame {
         });
     }
 }
-
-
-
-
-
-

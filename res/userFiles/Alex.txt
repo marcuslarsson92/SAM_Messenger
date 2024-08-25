@@ -1,0 +1,3 @@
+Username: Alex
+Iconpath: icons/icon1.png
+Activity Log:

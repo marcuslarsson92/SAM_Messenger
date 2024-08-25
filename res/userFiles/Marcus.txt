@@ -1,0 +1,3 @@
+Username: Marcus
+Iconpath: icons/icon2.png
+Activity Log:
