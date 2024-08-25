@@ -1,0 +1,3 @@
+Username: Simon
+Iconpath: icons/icon3.png
+Activity Log:

@@ -7,6 +7,7 @@ import model.User;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.filechooser.FileSystemView;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
@@ -18,6 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class ChatWindow extends JFrame {
     private JTextPane chatPane;
@@ -95,7 +97,17 @@ public class ChatWindow extends JFrame {
     }
 
     private void attachImage() {
+        // Skapa en JFileChooser
         JFileChooser fileChooser = new JFileChooser();
+
+        // Få referens till "Pictures"-mappen i användarens filsystem
+        File picturesDir = FileSystemView.getFileSystemView().getDefaultDirectory();
+        File picturesFolder = new File(picturesDir, "Pictures");
+
+        // Sätt standardkatalogen till "Pictures"-mappen
+        fileChooser.setCurrentDirectory(picturesFolder);
+
+        // Visa dialogen och hantera användarens val
         int result = fileChooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             attachedImageFile = fileChooser.getSelectedFile();

@@ -1,0 +1,3 @@
+Username: Johan
+Iconpath: icons/icon4.png
+Activity Log:
