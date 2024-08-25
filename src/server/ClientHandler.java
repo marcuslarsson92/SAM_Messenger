@@ -33,7 +33,6 @@ public class ClientHandler implements Runnable {
             while ((obj = in.readObject()) != null) {
                 if (obj instanceof Message) {
                     Message message = (Message) obj;
-                    message.setDeliveredTime(null); // Reset delivered time for new delivery
                     server.sendMessage(message);
                 }
             }
@@ -55,7 +54,6 @@ public class ClientHandler implements Runnable {
 
     public void sendMessage(Message message) {
         try {
-            message.setDeliveredTime(java.time.LocalDateTime.now());
             out.writeObject(message);
         } catch (IOException e) {
             e.printStackTrace();

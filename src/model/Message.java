@@ -16,6 +16,28 @@ public class Message implements Serializable {
     private LocalDateTime receivedTime;
     private LocalDateTime deliveredTime;
 
+    /**
+     * First constructor for message to one reciever
+     * @param sender
+     * @param receiver
+     * @param text
+     * @param image
+     */
+    public Message(User sender, User receiver, String text, Icon image) {
+        this.sender = sender;
+        this.receiver = receiver;
+        this.text = text;
+        this.image = image;
+        this.receivedTime = LocalDateTime.now();
+    }
+
+    /**
+     * Second constructor for message to multiple recievers
+     * @param sender
+     * @param receivers
+     * @param text
+     * @param image
+     */
     public Message(User sender, List<User> receivers, String text, Icon image) {
         this.sender = sender;
         this.receivers = receivers;
@@ -23,7 +45,6 @@ public class Message implements Serializable {
         this.image = image;
         this.receivedTime = LocalDateTime.now();
     }
-
     public User getSender() {
         return sender;
     }

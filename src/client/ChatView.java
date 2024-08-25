@@ -1,174 +1,4 @@
-
 package client;
-/*
-        import model.Message;
-        import model.User;
-
-        import javax.sound.sampled.*;
-        import javax.swing.*;
-        import java.awt.*;
-        import java.awt.event.ActionEvent;
-        import java.awt.event.ActionListener;
-        import java.io.File;
-        import java.io.IOException;
-        import java.util.ArrayList;
-        import java.util.HashMap;
-        import java.util.List;
-        import java.util.Map;
-
-public class ChatView extends JFrame {
-
-    private JList<String> userList;
-
-    private DefaultListModel<String> userListModel;
-    private Client client;
-    private List<User> users;
-    private JLabel loggedInAsLabel;
-    private DefaultListModel<String> newMessageUsers;
-    private Map<String, ChatWindow> chatWindows;
-
-    public ChatView(Client client) {
-        this.client = client;
-        this.users = new ArrayList<>();
-        this.newMessageUsers = new DefaultListModel<>();
-        this.chatWindows = new HashMap<>();
-
-        client.setMessageListener(message -> handleIncomingMessage(message));
-        client.setUserListListener(updatedUsers -> {
-            users = updatedUsers;
-            updateUserList();
-        });
-
-        setTitle("Chat Application - " + client.getUser().getName());
-        setSize(300, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-
-        loggedInAsLabel = new JLabel("Logged in as: " + client.getUser().getName());
-
-
-        userListModel = new DefaultListModel<>();
-        userList = new JList<>(userListModel);
-        userList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        userList.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                String selectedUser = userList.getSelectedValue();
-                if (newMessageUsers.contains(selectedUser)) {
-                    newMessageUsers.removeElement(selectedUser);
-                    userList.repaint();
-                }
-                openChatWindow(selectedUser);
-            }
-        });
-
-        userList.setCellRenderer(new UserListCellRenderer());
-
-        JScrollPane userScrollPane = new JScrollPane(userList);
-
-        JPanel panel = new JPanel(new BorderLayout());
-
-
-        JPanel leftPanel = new JPanel(new BorderLayout());
-        leftPanel.add(loggedInAsLabel, BorderLayout.NORTH);
-        leftPanel.add(userScrollPane, BorderLayout.CENTER);
-        leftPanel.add(panel, BorderLayout.SOUTH);
-
-        add(leftPanel, BorderLayout.CENTER);
-    }
-
-    private User getUserByName(String name) {
-        for (User user : users) {
-            if (user.getName().equals(name)) {
-                return user;
-            }
-        }
-        return null;
-    }
-
-    private void updateUserList() {
-        SwingUtilities.invokeLater(() -> {
-            userListModel.clear();
-            userListModel.addElement("Online:");
-            List<String> offlineUsers = new ArrayList<>();
-            for (User user : getAllUsers()) {
-                if (users.contains(user)) {
-                    if (!user.getName().equals(client.getUser().getName())) {
-                        userListModel.addElement(user.getName());
-                    }
-                } else {
-                    offlineUsers.add(user.getName());
-                }
-            }
-            userListModel.addElement("");
-            userListModel.addElement("Offline:");
-            for (String offlineUser : offlineUsers) {
-                userListModel.addElement(offlineUser);
-            }
-        });
-    }
-
-    private List<User> getAllUsers() {
-        return new ArrayList<>(users);
-    }
-
-    private ChatWindow openChatWindow(String username) {
-        User user = getUserByName(username);
-        if (user != null) {
-            return chatWindows.computeIfAbsent(username, k -> {
-                ChatWindow chatWindow = new ChatWindow(client, user);
-                chatWindow.setVisible(true);
-                return chatWindow;
-            });
-        }
-        return null;
-    }
-
-    private void handleIncomingMessage(Message message) {
-        String senderName = message.getSender().getName();
-        ChatWindow chatWindow = openChatWindow(senderName);
-        if (chatWindow != null) {
-            chatWindow.receiveMessage(message);
-        }
-
-        if (!newMessageUsers.contains(senderName)) {
-            newMessageUsers.addElement(senderName);
-            userList.repaint();
-        }
-        playNotificationSound();
-    }
-
-    private void playNotificationSound() {
-        try {
-            File soundFile = new File("res/sound/notification.wav");
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
-            Clip clip = AudioSystem.getClip();
-            clip.open(audioStream);
-            clip.start();
-        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private class UserListCellRenderer extends DefaultListCellRenderer {
-        @Override
-        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            Component component = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            if (newMessageUsers.contains(value)) {
-                setBackground(Color.BLUE);
-                setForeground(Color.WHITE);
-            }
-            if (value.toString().equals("Offline:")) {
-                setBackground(Color.LIGHT_GRAY);
-                setForeground(Color.DARK_GRAY);
-            }
-            return component;
-        }
-    }
-}
-
- */
-
-/*
 
 import model.Message;
 import model.User;
@@ -192,160 +22,7 @@ public class ChatView extends JFrame {
     private JLabel loggedInAsLabel;
     private DefaultListModel<User> newMessageUsers;
     private Map<String, ChatWindow> chatWindows;
-
-    public ChatView(Client client) {
-        this.client = client;
-        this.users = new ArrayList<>();
-        this.newMessageUsers = new DefaultListModel<>();
-        this.chatWindows = new HashMap<>();
-
-        client.setMessageListener(this::handleIncomingMessage);
-        client.setUserListListener(updatedUsers -> {
-            users = updatedUsers;
-            updateUserList();
-        });
-
-        setTitle("Chat Application - " + client.getUser().getName());
-        setSize(300, 600);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
-
-        loggedInAsLabel = new JLabel("Logged in as: " + client.getUser().getName());
-
-        userListModel = new DefaultListModel<>();
-        userList = new JList<>(userListModel);
-        userList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        userList.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                User selectedUser = userList.getSelectedValue();
-                if (newMessageUsers.contains(selectedUser)) {
-                    newMessageUsers.removeElement(selectedUser);
-                    userList.repaint();
-                }
-                openChatWindow(selectedUser.getName());
-            }
-        });
-
-        userList.setCellRenderer(new UserListCellRenderer());
-
-        JScrollPane userScrollPane = new JScrollPane(userList);
-
-        JPanel leftPanel = new JPanel(new BorderLayout());
-        leftPanel.add(loggedInAsLabel, BorderLayout.NORTH);
-        leftPanel.add(userScrollPane, BorderLayout.CENTER);
-
-        add(leftPanel, BorderLayout.CENTER);
-    }
-
-    private User getUserByName(String name) {
-        for (User user : users) {
-            if (user.getName().equals(name)) {
-                return user;
-            }
-        }
-        return null;
-    }
-
-    private void updateUserList() {
-        SwingUtilities.invokeLater(() -> {
-            userListModel.clear();
-            for (User user : users) {
-                if (!user.getName().equals(client.getUser().getName())) {
-                    userListModel.addElement(user);
-                }
-            }
-        });
-    }
-
-    private ChatWindow openChatWindow(String username) {
-        User user = getUserByName(username);
-        if (user != null) {
-            return chatWindows.computeIfAbsent(username, k -> {
-                ChatWindow chatWindow = new ChatWindow(client, user);
-                chatWindow.setVisible(true);
-                return chatWindow;
-            });
-        }
-        return null;
-    }
-
-    private void handleIncomingMessage(Message message) {
-        String senderName = message.getSender().getName();
-        ChatWindow chatWindow = openChatWindow(senderName);
-        if (chatWindow != null) {
-            chatWindow.receiveMessage(message);
-        }
-
-        User sender = getUserByName(senderName);
-        if (sender != null && !newMessageUsers.contains(sender)) {
-            newMessageUsers.addElement(sender);
-            userList.repaint();
-        }
-        playNotificationSound();
-    }
-
-    private void playNotificationSound() {
-        try {
-            File soundFile = new File("res/sound/notification.wav");
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
-            Clip clip = AudioSystem.getClip();
-            clip.open(audioStream);
-            clip.start();
-        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private class UserListCellRenderer extends DefaultListCellRenderer {
-        @Override
-        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-            JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-            if (value instanceof User) {
-                User user = (User) value;
-                label.setText(user.getName());
-                label.setIcon(user.getIcon());  // Använd User-klassens getIcon() metod för att hämta profilbilden
-                label.setHorizontalTextPosition(JLabel.RIGHT);  // Placera texten till höger om bilden
-            }
-
-            if (newMessageUsers.contains(value)) {
-                label.setBackground(Color.BLUE);
-                label.setForeground(Color.WHITE);
-            } else if (value instanceof String && value.equals("Offline:")) {
-                label.setBackground(Color.LIGHT_GRAY);
-                label.setForeground(Color.DARK_GRAY);
-            }
-
-            return label;
-        }
-    }
-}
-
- */
-
-
-import model.Message;
-import model.User;
-
-import javax.sound.sampled.*;
-import javax.swing.*;
-import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-public class ChatView extends JFrame {
-
-    private JList<User> userList;
-    private DefaultListModel<User> userListModel;
-    private Client client;
-    private List<User> users;
-    private JLabel loggedInAsLabel;
-    private DefaultListModel<User> newMessageUsers;
-    private Map<String, ChatWindow> chatWindows;
+    private JButton groupChatButton;
 
     public ChatView(Client client) {
         this.client = client;
@@ -389,13 +66,27 @@ public class ChatView extends JFrame {
 
         userList.setCellRenderer(new UserListCellRenderer());
 
+        groupChatButton = new JButton("New Groupchat");
+        groupChatButton.addActionListener(e -> newGroupChat());
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(groupChatButton);
+
         JScrollPane userScrollPane = new JScrollPane(userList);
 
         JPanel leftPanel = new JPanel(new BorderLayout());
         leftPanel.add(loggedInAsLabel, BorderLayout.NORTH);
         leftPanel.add(userScrollPane, BorderLayout.CENTER);
 
+        add(buttonPanel, BorderLayout.SOUTH);
         add(leftPanel, BorderLayout.CENTER);
+    }
+
+    /**
+     * Opens new window with a groupchat
+     */
+    private void newGroupChat() {
+        GroupChat groupChat = new GroupChat();
+        groupChat.setVisible(true);
     }
 
     private User getUserByName(String name) {
