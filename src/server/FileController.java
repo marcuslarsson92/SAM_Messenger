@@ -1,4 +1,4 @@
-package client;
+package server;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -7,11 +7,11 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class FileHandler {
+public class FileController {
 
     private File logFile;
 
-    public FileHandler(String username) {
+    public FileController(String username) {
         // Sätt filens sökväg till "userFiles" mappen i resources
         String userFilesDir = "resources/userFiles/";
         logFile = new File(userFilesDir + username + ".txt");

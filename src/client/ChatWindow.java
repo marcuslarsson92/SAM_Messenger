@@ -41,6 +41,14 @@ public class ChatWindow extends JFrame {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                // Istället för att stänga, bara dölja fönstret
+                setVisible(false);
+            }
+        });
+
         // Initialisera chatPane och lägg till den i chatScrollPane
         chatPane = new JTextPane();
         chatPane.setEditable(false);
@@ -87,8 +95,8 @@ public class ChatWindow extends JFrame {
             try {
                 client.sendMessage(message);
                 displayMessage(message);
-                FileHandler senderFileHandler = new FileHandler(client.getUser().getName());
-                senderFileHandler.logMessageSent(client.getUser().getName(), String.valueOf(receiver), message.getText());
+                //FileHandler senderFileHandler = new FileHandler(client.getUser().getName());
+                //senderFileHandler.logMessageSent(client.getUser().getName(), String.valueOf(receiver), message.getText());
                 inputField.setText("");
             } catch (IOException e) {
                 e.printStackTrace();
