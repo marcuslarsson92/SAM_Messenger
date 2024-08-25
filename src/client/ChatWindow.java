@@ -29,12 +29,22 @@ public class ChatWindow extends JFrame {
     private ImageIcon attachedImage;
     private File attachedImageFile;
     private JScrollPane chatScrollPane;
+    private List <User> receivers; //för gruppchatt
 
     public ChatWindow(Client client, User receiver) {
+        this(client, List.of(receiver));
+    }
+    public ChatWindow(Client client, List <User> receivers) {
         this.client = client;
-        this.receiver = receiver;
+        this.receivers = receivers;
 
-        setTitle("Chat with " + receiver.getName());
+        if (receivers.size() == 1) {
+            setTitle("Chat with " + receiver.getName());
+        } else {
+            setTitle("Group chat with " + getReceiverNames());
+        }
+
+
         setSize(400, 400);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -74,15 +84,31 @@ public class ChatWindow extends JFrame {
         add(chatScrollPane, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
     }
+    // Hämta namn på alla mottagare för att visa i fönstertiteln
+    private String getReceiverNames() {
+        StringBuilder names = new StringBuilder();
+        for (User user : receivers) {
+            if (names.length() > 0) {
+                names.append(", ");
+            }
+            names.append(user.getName());
+        }
+        return names.toString();
+    }
 
+
+    /**
+     * sendMessage utan input som anropas när man klickar på skicka
+     * i denna anropas en annan metod sendMessage(message) som skriver meddelandet
+     * som objekt över oos.
+     */
     private void sendMessage() {
         String text = inputField.getText();
-        List<User> receivers = new ArrayList<>();
-        receivers.add(receiver);
 
         if (!text.isEmpty()) {
             Message message = new Message(client.getUser(), receivers, text, null);
             try {
+                System.out.println("Writing recievers: " + receivers);
                 client.sendMessage(message);
                 displayMessage(message);
                 inputField.setText("");

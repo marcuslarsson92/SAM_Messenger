@@ -85,9 +85,19 @@ public class ChatView extends JFrame {
      * Opens new window with a groupchat
      */
     private void newGroupChat() {
-        GroupChat groupChat = new GroupChat();
-        groupChat.setVisible(true);
+        // Samla alla online-användare
+        List<User> onlineUsers = new ArrayList<>();
+        for (User user : users) {
+            if (!user.getName().equals(client.getUser().getName())) {
+                onlineUsers.add(user);
+            }
+        }
+
+        // Skapa ett nytt gruppchattfönster
+        ChatWindow groupChatWindow = new ChatWindow(client, onlineUsers);
+        groupChatWindow.setVisible(true);
     }
+
 
     private User getUserByName(String name) {
         for (User user : users) {
