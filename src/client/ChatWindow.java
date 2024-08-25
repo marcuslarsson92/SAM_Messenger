@@ -87,6 +87,8 @@ public class ChatWindow extends JFrame {
             try {
                 client.sendMessage(message);
                 displayMessage(message);
+                FileHandler senderFileHandler = new FileHandler(client.getUser().getName());
+                senderFileHandler.logMessageSent(client.getUser().getName(), String.valueOf(receiver), message.getText());
                 inputField.setText("");
             } catch (IOException e) {
                 e.printStackTrace();
