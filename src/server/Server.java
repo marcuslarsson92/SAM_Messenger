@@ -113,6 +113,7 @@ public class Server {
     private ClientHandler getClientHandler(User user) {
         for (ClientHandler handler : clientHandlers) {
             if (handler.getUser().getName().equals(user.getName())) {
+                System.out.println("Inne i getClientHandler och söker efter: " + handler.getUser().getName());
                 return handler;
             }
         }

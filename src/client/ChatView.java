@@ -66,7 +66,7 @@ public class ChatView extends JFrame {
 
         userList.setCellRenderer(new UserListCellRenderer());
 
-        groupChatButton = new JButton("New Groupchat");
+        groupChatButton = new JButton("DM all online");
         groupChatButton.addActionListener(e -> newGroupChat());
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(groupChatButton);

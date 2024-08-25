@@ -39,7 +39,7 @@ public class ChatWindow extends JFrame {
         this.receivers = receivers;
 
         if (receivers.size() == 1) {
-            setTitle("Chat with " + receiver.getName());
+            setTitle("Chat with " + getReceiverNames());
         } else {
             setTitle("Group chat with " + getReceiverNames());
         }
