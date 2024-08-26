@@ -1,15 +1,14 @@
-package server;
+package server.Control;
 
 import model.Message;
 import model.User;
+import server.Boundary.ServerView;
 
+import javax.swing.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.logging.FileHandler;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 public class Server {
     private final int port;
@@ -17,13 +16,16 @@ public class Server {
     private Map<String, User> connectedUsers = new ConcurrentHashMap<>();
     private Queue<Message> undeliveredMessages = new ConcurrentLinkedQueue<>();
     private boolean running = true;
-    private static final Logger logger = Logger.getLogger(Server.class.getName());
+    private ServerView view;
     private List<User> allUsers = new ArrayList<>(); // Lista över alla registrerade användare
-
 
     public Server(int port) {
         this.port = port;
-        setupLogger();
+    }
+
+    // Method to set the ServerView, so the Server can log messages
+    public void setView(ServerView view) {
+        this.view = view;
     }
 
     public void start() {
@@ -46,23 +48,20 @@ public class Server {
         }
     }
 
-    private void setupLogger() {
-        try {
-            FileHandler fileHandler = new FileHandler("server_log.txt", true);
-            fileHandler.setFormatter(new SimpleFormatter());
-            logger.addHandler(fileHandler);
-            logger.setUseParentHandlers(false);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void stop() throws IOException {
+    public void stopServer() {
         running = false;
         for (ClientHandler clientHandler : clientHandlers) {
             clientHandler.closeConnection();
         }
         logMessage("Server stopped");
+    }
+
+    // Method for logging messages, which calls ServerView's logMessage method
+    public void logMessage(String message) {
+        if (view != null) {
+            view.logMessage(message);
+        }
+        System.out.println(message); // Fallback if no view is set
     }
 
     public synchronized void broadcastUserUpdate() {
@@ -109,7 +108,6 @@ public class Server {
                     message.getReceivers().toString() + " delivered");
         }
     }
-
     private ClientHandler getClientHandler(User user) {
         for (ClientHandler handler : clientHandlers) {
             if (handler.getUser().getName().equals(user.getName())) {
@@ -133,13 +131,15 @@ public class Server {
             }
         }
     }
-
-    public void logMessage(String message) {
-        System.out.println(message);
-    }
-
     public static void main(String[] args) {
         Server server = new Server(12345);
-        server.start();
+
+        SwingUtilities.invokeLater(() -> {
+            ServerView serverView = new ServerView();
+            server.setView(serverView);
+            serverView.setVisible(true);
+        });
+
     }
+
 }
