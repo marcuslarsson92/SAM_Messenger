@@ -1,8 +1,9 @@
-package server;
+package server.Boundary;
+
+import server.Control.Server;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.IOException;
 import java.time.LocalDateTime;
 
 public class ServerView extends JFrame {
@@ -10,7 +11,6 @@ public class ServerView extends JFrame {
     private JButton startButton;
     private JButton stopButton;
     private Server server;
-    private Thread serverThread;
 
     public ServerView() {
         setTitle("Server Log");
@@ -37,19 +37,16 @@ public class ServerView extends JFrame {
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
+    // GUI-method to log messages
     public void logMessage(String message) {
         SwingUtilities.invokeLater(() -> logArea.append(message + "\n"));
     }
 
     private void startServer() {
-        server = new Server(12345) {
-            @Override
-            public void logMessage(String message) {
-                ServerView.this.logMessage(message);
-            }
-        };
-        serverThread = new Thread(server::start);
-        serverThread.start();
+        // GUI logic only, server logic is handled in Server class
+        server = new Server(12345);
+        server.setView(this); // Setting the view so that Server can call logMessage
+        new Thread(server::start).start();
 
         startButton.setEnabled(false);
         stopButton.setEnabled(true);
@@ -58,23 +55,12 @@ public class ServerView extends JFrame {
 
     private void stopServer() {
         if (server != null) {
-            try {
-                server.stop();
-                serverThread.interrupt();
-                logMessage("Server stopped at " + LocalDateTime.now());
-            } catch (IOException e) {
-                logMessage("Error stopping server: " + e.getMessage());
-            }
+            server.stopServer();  // Just calling a method in Server class
+            logMessage("Server stopped at " + LocalDateTime.now());
+            startButton.setEnabled(true);
+            stopButton.setEnabled(false);
         }
-
-        startButton.setEnabled(true);
-        stopButton.setEnabled(false);
-    }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            ServerView view = new ServerView();
-            view.setVisible(true);
-        });
     }
 }
+
+

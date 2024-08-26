@@ -1,7 +1,8 @@
-package server;
+package server.Control;
 
 import model.Message;
 import model.User;
+import server.Control.Server;
 
 import java.io.*;
 import java.net.Socket;

@@ -1,8 +1,10 @@
-package server;
+package server.Control;
 
 import model.Message;
 import model.User;
+import server.Boundary.ServerView;
 
+import javax.swing.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -14,9 +16,16 @@ public class Server {
     private Map<String, User> connectedUsers = new ConcurrentHashMap<>();
     private Queue<Message> undeliveredMessages = new ConcurrentLinkedQueue<>();
     private boolean running = true;
+    private ServerView view;
+    private List<User> allUsers = new ArrayList<>(); // Lista över alla registrerade användare
 
     public Server(int port) {
         this.port = port;
+    }
+
+    // Method to set the ServerView, so the Server can log messages
+    public void setView(ServerView view) {
+        this.view = view;
     }
 
     public void start() {
@@ -39,12 +48,20 @@ public class Server {
         }
     }
 
-    public void stop() throws IOException {
+    public void stopServer() {
         running = false;
         for (ClientHandler clientHandler : clientHandlers) {
             clientHandler.closeConnection();
         }
         logMessage("Server stopped");
+    }
+
+    // Method for logging messages, which calls ServerView's logMessage method
+    public void logMessage(String message) {
+        if (view != null) {
+            view.logMessage(message);
+        }
+        System.out.println(message); // Fallback if no view is set
     }
 
     public synchronized void broadcastUserUpdate() {
@@ -55,15 +72,22 @@ public class Server {
     }
 
     public synchronized void addUser(User user) {
+        if (!allUsers.contains(user)) {
+            allUsers.add(user);
+        }
         connectedUsers.put(user.getName(), user);
         logMessage("User connected: " + user.getName());
         broadcastUserUpdate();
+
     }
 
     public synchronized void removeUser(User user) {
         connectedUsers.remove(user.getName());
         logMessage("User disconnected: " + user.getName());
         broadcastUserUpdate();
+    }
+    public synchronized List<User> getAllUsers() {
+        return new ArrayList<>(allUsers);
     }
 
     public synchronized void sendMessage(Message message) {
@@ -84,7 +108,6 @@ public class Server {
                     message.getReceivers().toString() + " delivered");
         }
     }
-
     private ClientHandler getClientHandler(User user) {
         for (ClientHandler handler : clientHandlers) {
             if (handler.getUser().getName().equals(user.getName())) {
@@ -108,13 +131,15 @@ public class Server {
             }
         }
     }
-
-    public void logMessage(String message) {
-        System.out.println(message);
-    }
-
     public static void main(String[] args) {
         Server server = new Server(12345);
-        server.start();
+
+        SwingUtilities.invokeLater(() -> {
+            ServerView serverView = new ServerView();
+            server.setView(serverView);
+            serverView.setVisible(true);
+        });
+
     }
+
 }
