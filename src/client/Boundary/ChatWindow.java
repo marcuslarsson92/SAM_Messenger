@@ -26,16 +26,25 @@ public class ChatWindow extends JFrame {
     private JButton sendButton;
     private Client client;
     private User receiver;
+    private List <User> receivers;
     private JButton attachImageButton;
     private ImageIcon attachedImage;
     private File attachedImageFile;
     private JScrollPane chatScrollPane;
 
     public ChatWindow(Client client, User receiver) {
+        this(client, List.of(receiver));
+    }
+    public ChatWindow(Client client, List <User> receivers) {
         this.client = client;
-        this.receiver = receiver;
+        this.receivers = receivers;
 
-        setTitle("Chat with " + receiver.getName());
+        if (receivers.size() == 1) {
+            setTitle("Chat with " + receivers.get(0).getName());
+        } else {
+            setTitle("Group chat with " + getReceiverNames());
+        }
+
         setSize(400, 400);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -86,8 +95,8 @@ public class ChatWindow extends JFrame {
 
     private void sendMessage() {
         String text = inputField.getText();
-        List<User> receivers = new ArrayList<>();
-        receivers.add(receiver);
+        //List<User> receivers = new ArrayList<>();
+        //receivers.add(receiver);
 
         if (!text.isEmpty()) {
             Message message = new Message(client.getUser(), receivers, text, null);
@@ -186,6 +195,18 @@ public class ChatWindow extends JFrame {
         } catch (BadLocationException e) {
             e.printStackTrace();
         }
+    }
+
+    // Hämta namn på alla mottagare för att visa i fönstertiteln
+    private String getReceiverNames() {
+        StringBuilder names = new StringBuilder();
+        for (User user : receivers) {
+            if (names.length() > 0) {
+                names.append(", ");
+            }
+            names.append(user.getName());
+        }
+        return names.toString();
     }
 
 }

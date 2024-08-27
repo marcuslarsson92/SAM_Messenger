@@ -166,4 +166,17 @@ public class ChatController {
     public DefaultListModel<Object> getNewMessageUsers() {
         return newMessageUsers;
     }
+
+    public void newGroupChat() {
+        List<User> onlineUsers = new ArrayList<>();
+        for (User user : users) {
+            if (!user.getName().equals(client.getUser().getName())) {
+                onlineUsers.add(user);
+            }
+        }
+
+        // Skapa ett nytt gruppchattfönster
+        ChatWindow groupChatWindow = new ChatWindow(client, onlineUsers);
+        groupChatWindow.setVisible(true);
+    }
 }
