@@ -1,13 +1,9 @@
 package client.Control;
 
-import client.Boundary.ChatView;
-import client.Control.MessageListener;
-import client.Control.UserListListener;
 import client.Entity.Message;
 import client.Entity.User;
 import client.Boundary.ClientView;
 
-import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.List;

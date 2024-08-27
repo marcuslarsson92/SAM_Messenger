@@ -25,7 +25,6 @@ public class ChatWindow extends JFrame {
     private JTextField inputField;
     private JButton sendButton;
     private Client client;
-    private User receiver;
     private List <User> receivers;
     private JButton attachImageButton;
     private ImageIcon attachedImage;
@@ -68,18 +67,8 @@ public class ChatWindow extends JFrame {
         attachImageButton = new JButton("Attach Image");
         sendButton = new JButton("Send");
 
-        sendButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                sendMessage();
-            }
-        });
-        attachImageButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                attachImage();
-            }
-        });
+        sendButton.addActionListener(e -> sendMessage());
+        attachImageButton.addActionListener(e -> attachImage());
 
         JPanel bottomPanel = new JPanel(new BorderLayout());
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -95,16 +84,12 @@ public class ChatWindow extends JFrame {
 
     private void sendMessage() {
         String text = inputField.getText();
-        //List<User> receivers = new ArrayList<>();
-        //receivers.add(receiver);
 
         if (!text.isEmpty()) {
             Message message = new Message(client.getUser(), receivers, text, null);
             try {
                 client.sendMessage(message);
                 displayMessage(message);
-                //FileHandler senderFileHandler = new FileHandler(client.getUser().getName());
-                //senderFileHandler.logMessageSent(client.getUser().getName(), String.valueOf(receiver), message.getText());
                 inputField.setText("");
             } catch (IOException e) {
                 e.printStackTrace();
@@ -139,8 +124,6 @@ public class ChatWindow extends JFrame {
     }
 
     private void sendImage(ImageIcon imageIcon) {
-        List<User> receivers = new ArrayList<>();
-        receivers.add(receiver);
 
         Message message = new Message(client.getUser(), receivers, null, attachedImage);
         try {

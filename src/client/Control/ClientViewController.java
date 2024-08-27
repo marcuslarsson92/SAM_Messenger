@@ -1,8 +1,6 @@
 package client.Control;
 
-import client.Boundary.ChatView;
 import client.Boundary.ClientView;
-import client.Control.Client;
 import client.Entity.User;
 
 import java.io.IOException;

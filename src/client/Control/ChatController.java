@@ -1,9 +1,7 @@
 package client.Control;
 
-import client.Control.Client;
 import client.Entity.Message;
 import client.Entity.User;
-import client.Boundary.ChatView;
 import client.Boundary.ChatWindow;
 
 import javax.sound.sampled.*;
