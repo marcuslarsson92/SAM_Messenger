@@ -155,17 +155,5 @@ public class Client {
         }
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            ClientView view = new ClientView();
-            Client client = null; // Använd null tills login-processen är klar
-            try {
-                client = new Client(null, "localhost", 12345);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            client.setView(view);
-            view.setVisible(true);
-        });
-    }
+
 }

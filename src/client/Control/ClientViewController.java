@@ -1,23 +1,21 @@
 package client.Control;
 
 import client.Boundary.ChatView;
-import client.Control.Client;
 import client.Entity.User;
 import client.Boundary.ClientView;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Scanner;
 
-public class ClientController {
+public class ClientViewController {
     private ClientView view;
 
     // Katalog för användarfiler
     private final String userFilesDirectory = "res/userFiles/";
 
-    public ClientController(ClientView view) {
+    public ClientViewController(ClientView view) {
         this.view = view;
 
         // Registrerar event listener för "Connect"-knappen
