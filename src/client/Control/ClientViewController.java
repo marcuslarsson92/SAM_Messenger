@@ -1,6 +1,16 @@
 package client.Control;
 
 import client.Boundary.ChatView;
+import client.Boundary.ClientView;
+import client.Control.Client;
+import client.Entity.User;
+
+import java.io.IOException;
+
+/*package client.Control;
+
+import client.Boundary.ChatView;
+import client.Control.Client;
 import client.Entity.User;
 import client.Boundary.ClientView;
 
@@ -87,3 +97,38 @@ public class ClientViewController {
         }
     }
 }
+'
+ */
+public class ClientViewController {
+    private ClientView view;
+    private Client client;
+
+    public ClientViewController(ClientView view) {
+        this.view = view;
+        this.view.setConnectButtonListener(e -> connect());
+    }
+
+    private void connect() {
+        String username = view.getUsername();
+        String selectedIcon = view.getSelectedIcon();
+
+        if (username.isEmpty() || selectedIcon == null) {
+            view.showErrorMessage("Please enter a username and select an icon.");
+            return;
+        }
+
+        User user = new User(username, selectedIcon);
+        try {
+            client = new Client(user, "localhost", 12345);
+            client.setView(view);
+            // Öppna ChatView
+            ChatView chatView = new ChatView(client);
+            chatView.setVisible(true);
+            view.setVisible(false);
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            view.showErrorMessage("Connection failed");
+        }
+    }
+}
+
