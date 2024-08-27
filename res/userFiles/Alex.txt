@@ -1,3 +1,9 @@
 Username: Alex
 Iconpath: icons/icon1.png
 Activity Log:
+Simon sent message to Alex. Message: "Simon skickar till Alex" 26/08/24 18:44
+Simon sent message to Alex. Message: "Simon skickar till Alex" 26/08/24 18:44
+Marcus sent message to Alex. Message: "Marcus seeeends to Alleballe" 26/08/24 22:57
+Marcus sent message to Alex. Message: "Marcus seeeends to Alleballe" 26/08/24 22:57
+Marcus sent message to Alex. Message: "Mackan sends too Alex" 26/08/24 22:59
+Marcus sent message to Alex. Message: "Mackan sends too Alex" 26/08/24 22:59

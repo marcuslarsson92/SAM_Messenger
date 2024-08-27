@@ -94,6 +94,7 @@ public class Server {
     public synchronized void sendMessage(Message message) {
         boolean delivered = false;
         for (User receiver : message.getReceivers()) {
+            System.out.println("Inne i server.sendMessage().  Sender = " + message.getSender().getName() + " och receiver = " + message.getReceivers().get(0).getName());
             ClientHandler handler = getClientHandler(receiver);
             if (handler != null) {
                 handler.sendMessage(message);

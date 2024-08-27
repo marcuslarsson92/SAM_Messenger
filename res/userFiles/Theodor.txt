@@ -1,3 +1,0 @@
-Username: Theodor
-Iconpath: icons/icon3.png
-Activity Log:

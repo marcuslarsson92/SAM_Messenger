@@ -147,6 +147,7 @@ public class ClientView extends JFrame {
             Scanner scanner = new Scanner(userFile);
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
+                //När det finns i Server lägg: logMessage(line)
                 System.out.println(line);
             }
             scanner.close();

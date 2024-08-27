@@ -134,11 +134,13 @@ public class ChatView extends JFrame {
         });
     }
 
-    private ChatWindow openChatWindow(String username) {
-        User user = getUserByName(username);
-        if (user != null) {
-            return chatWindows.computeIfAbsent(username, k -> {
-                ChatWindow chatWindow = new ChatWindow(client, user);
+
+    //Ändrat massa strings här om det blir fel, kolla här
+    private ChatWindow openChatWindow(String receiver) {
+        User recUser = getUserByName(receiver);
+        if (recUser != null) {
+            return chatWindows.computeIfAbsent(receiver, k -> {
+                ChatWindow chatWindow = new ChatWindow(client, recUser);
 
                 Point mainWindowLocation = this.getLocation();
                 int mainWindowWidth = this.getWidth();

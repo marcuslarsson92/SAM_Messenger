@@ -1,5 +1,7 @@
 package server;
 
+import model.User;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -10,11 +12,12 @@ import java.util.Date;
 public class FileController {
 
     private File logFile;
+    private User user;
 
-    public FileController(String username) {
+    public FileController(User user) {
         // Sätt filens sökväg till "userFiles" mappen i resources
-        String userFilesDir = "resources/userFiles/";
-        logFile = new File(userFilesDir + username + ".txt");
+        String userFilesDir = "res/userFiles/";
+        logFile = new File(userFilesDir + user.getName() + ".txt");
 
         // Kontrollera om filen redan existerar, om inte skapa den
         if (!logFile.exists()) {
@@ -26,23 +29,19 @@ public class FileController {
         }
     }
 
+
     // Loggar ett meddelande skickat av användaren
     public void logMessageSent(String sender, String receiver, String message) {
-        String logEntry = formatLogEntry(sender, receiver, message, "Sent");
-        writeToFile(logEntry);
-    }
-
-    // Loggar ett meddelande mottaget av användaren
-    public void logMessageReceived(String sender, String receiver, String message) {
-        String logEntry = formatLogEntry(sender, receiver, message, "Received");
+        System.out.println("Logging sent message for: " + sender);
+        String logEntry = formatLogEntry(sender, receiver, message);
         writeToFile(logEntry);
     }
 
     // Formaterar loggposten
-    private String formatLogEntry(String sender, String receiver, String message, String status) {
+    private String formatLogEntry(String user1, String user2, String message) {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
         String timestamp = sdf.format(new Date());
-        return sender + " " + status + " message to " + receiver + ". Message: \"" + message + "\" " + status + ": " + timestamp + "\n";
+        return user1 + " sent message to " + user2 + ". Message: \"" + message + "\" " + timestamp + "\n";
     }
 
     // Skriver loggposten till filen

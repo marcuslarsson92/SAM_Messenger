@@ -1,11 +1,9 @@
 package client;
 
 
-import client.Client;
 import model.Message;
 import model.User;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.text.BadLocationException;
@@ -63,7 +61,7 @@ public class ChatWindow extends JFrame {
         sendButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                sendMessage();
+                buildMessage();
             }
         });
         attachImageButton.addActionListener(new ActionListener() {
@@ -85,7 +83,7 @@ public class ChatWindow extends JFrame {
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    private void sendMessage() {
+    private void buildMessage() {
         String text = inputField.getText();
         List<User> receivers = new ArrayList<>();
         receivers.add(receiver);

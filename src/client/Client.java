@@ -35,6 +35,7 @@ public class Client {
     }
 
     public void sendMessage(Message message) throws IOException {
+        System.out.println("Inne i " + user.getName() + "client i sendMessage metoden. Sender = " + message.getSender().getName() + " och receiver = " + message.getReceivers().get(0).getName());
         out.writeObject(message);
 
     }
@@ -55,6 +56,7 @@ public class Client {
                 while ((obj = in.readObject()) != null) {
                     if (obj instanceof Message) {
                         if (messageListener != null) {
+                            System.out.println("Inne i run metoden och tar emot Message-objekt i Client: " + user.getName());
                             messageListener.onMessageReceived((Message) obj);
                         }
                     } else if (obj instanceof List) {

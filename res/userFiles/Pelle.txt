@@ -1,0 +1,5 @@
+Username: Pelle
+Iconpath: icons/icon3.png
+Activity Log:
+Johan sent message to Pelle. Message: "Johan skickar till Pelle" 27/08/24 11:53
+Johan sent message to Pelle. Message: "Johan skickar till Pelle" 27/08/24 12:02

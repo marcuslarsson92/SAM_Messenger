@@ -5,7 +5,9 @@ import model.User;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ClientHandler implements Runnable {
     private Socket socket;
@@ -14,11 +16,11 @@ public class ClientHandler implements Runnable {
     private ObjectOutputStream out;
     private User user;
     private FileController fileController;
+    private Map<User, FileController> receiverFCs = new HashMap<>();  // För att hålla mottagarnas FileController
 
     public ClientHandler(Socket socket, Server server) {
         this.socket = socket;
         this.server = server;
-        fileController = new FileController(user.getName());
     }
 
     @Override
@@ -30,6 +32,8 @@ public class ClientHandler implements Runnable {
             user = (User) in.readObject();
             server.addUser(user);
             server.deliverUndeliveredMessages(user);
+            fileController = new FileController(user);
+            System.out.println("FileController created for: " + user.getName());
 
             Object obj;
             while ((obj = in.readObject()) != null) {
@@ -55,24 +59,35 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public void sendMessage(Message message) {
+    public void sendMessage(Message msg) {
         try {
-            message.setDeliveredTime(java.time.LocalDateTime.now());
-            out.writeObject(message);
-            //lägg in i fil
-            List <User> rec = message.getReceivers();
-            if (rec.size() == 1) {
-                User user = (User)rec.get(1);
-                user.getName(); //
-            }
-            message.getReceivers();
+            msg.setDeliveredTime(java.time.LocalDateTime.now());
+            out.writeObject(msg);
 
-            //FileHandler senderFileHandler = new FileHandler(client.getUser().getName());
-            //senderFileHandler.logMessageSent(client.getUser().getName(), String.valueOf(receiver), message.getText());
+            System.out.println("FileController created for: " + user.getName());
+
+            fileController.logMessageSent(msg.getSender().getName(), getReceiverNames(msg), msg.getText());
+            System.out.println("FÖRSTA LOGMESSAGESENT, msg.getSender() = " + msg.getSender().getName());
+
+            for (User receiver : msg.getReceivers()) {
+                FileController receiverFC = receiverFCs.computeIfAbsent(receiver, n -> new FileController(receiver));
+                System.out.println("Receiver.getname = " + receiver.getName());
+                receiverFC.logMessageSent(msg.getSender().getName(), receiver.getName(), msg.getText());
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    private String getReceiverNames(Message message) {
+        StringBuilder names = new StringBuilder();
+        for (User user : message.getReceivers()) {
+            if (names.length() > 0) {
+                names.append(", ");
+            }
+            names.append(user.getName());
+        }
+        return names.toString();
     }
 
     public User getUser() {
