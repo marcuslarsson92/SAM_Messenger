@@ -1,3 +1,6 @@
 Username: Marcus
 Iconpath: icons/icon2.png
 Activity Log:
+Marcus received a message from Alex. Message: "Alex till marcus" Time: 28/08/2024 00:35
+Marcus sent a message to Alex. Message: "tack tack" Time: 28/08/2024 00:35
+Marcus sent a message to Alex. Message: "Hej" Time: 28/08/2024 00:50

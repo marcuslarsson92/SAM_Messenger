@@ -1,5 +1,7 @@
 package server.Control;
 
+import client.Entity.User;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
@@ -11,10 +13,10 @@ public class FileController {
 
     private File logFile;
 
-    public FileController(String username) {
+    public FileController(User user) {
         // Sätt filens sökväg till "userFiles" mappen i resources
-        String userFilesDir = "resources/userFiles/";
-        logFile = new File(userFilesDir + username + ".txt");
+        String userFilesDir = "res/userFiles/";
+        logFile = new File(userFilesDir + user.getName() + ".txt");
 
         // Kontrollera om filen redan existerar, om inte skapa den
         if (!logFile.exists()) {
@@ -28,21 +30,28 @@ public class FileController {
 
     // Loggar ett meddelande skickat av användaren
     public void logMessageSent(String sender, String receiver, String message) {
-        String logEntry = formatLogEntry(sender, receiver, message, "Sent");
+        System.out.println("Logging sent message for: " + sender);
+        String logEntry = formatLogEntry(sender, receiver, message, "sent");
         writeToFile(logEntry);
     }
 
-    // Loggar ett meddelande mottaget av användaren
+    // Loggar ett mottaget meddelande
     public void logMessageReceived(String sender, String receiver, String message) {
-        String logEntry = formatLogEntry(sender, receiver, message, "Received");
+        System.out.println("Logging received message for: " + receiver);
+        String logEntry = formatLogEntry(sender, receiver, message, "received");
         writeToFile(logEntry);
     }
 
     // Formaterar loggposten
-    private String formatLogEntry(String sender, String receiver, String message, String status) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
+    private String formatLogEntry(String sender, String receiver, String message, String action) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         String timestamp = sdf.format(new Date());
-        return sender + " " + status + " message to " + receiver + ". Message: \"" + message + "\" " + status + ": " + timestamp + "\n";
+        if ("sent".equals(action)) {
+            return sender + " sent a message to " + receiver + ". Message: \"" + message + "\" Time: " + timestamp + "\n";
+        } else if ("received".equals(action)) {
+            return receiver + " received a message from " + sender + ". Message: \"" + message + "\" Time: " + timestamp + "\n";
+        }
+        return "";
     }
 
     // Skriver loggposten till filen
@@ -54,3 +63,4 @@ public class FileController {
         }
     }
 }
+
