@@ -1,9 +1,6 @@
 Username: Alex
 Iconpath: icons/icon1.png
 Activity Log:
-Simon sent message to Alex. Message: "Simon skickar till Alex" 26/08/24 18:44
-Simon sent message to Alex. Message: "Simon skickar till Alex" 26/08/24 18:44
-Marcus sent message to Alex. Message: "Marcus seeeends to Alleballe" 26/08/24 22:57
-Marcus sent message to Alex. Message: "Marcus seeeends to Alleballe" 26/08/24 22:57
-Marcus sent message to Alex. Message: "Mackan sends too Alex" 26/08/24 22:59
-Marcus sent message to Alex. Message: "Mackan sends too Alex" 26/08/24 22:59
+Alex sent message to [model.User@88f16443]. Message: "från marcus till alex" 27/08/24 16:03
+Alex received a message from Marcus. Message: "Marcus till Alex" Time: 27/08/2024 16:08
+Alex sent a message to Marcus. Message: "Alex skickar till marcus kl 1610" Time: 27/08/2024 16:10

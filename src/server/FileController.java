@@ -12,7 +12,6 @@ import java.util.Date;
 public class FileController {
 
     private File logFile;
-    private User user;
 
     public FileController(User user) {
         // Sätt filens sökväg till "userFiles" mappen i resources
@@ -29,19 +28,30 @@ public class FileController {
         }
     }
 
-
     // Loggar ett meddelande skickat av användaren
     public void logMessageSent(String sender, String receiver, String message) {
         System.out.println("Logging sent message for: " + sender);
-        String logEntry = formatLogEntry(sender, receiver, message);
+        String logEntry = formatLogEntry(sender, receiver, message, "sent");
+        writeToFile(logEntry);
+    }
+
+    // Loggar ett mottaget meddelande
+    public void logMessageReceived(String sender, String receiver, String message) {
+        System.out.println("Logging received message for: " + receiver);
+        String logEntry = formatLogEntry(sender, receiver, message, "received");
         writeToFile(logEntry);
     }
 
     // Formaterar loggposten
-    private String formatLogEntry(String user1, String user2, String message) {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yy HH:mm");
+    private String formatLogEntry(String sender, String receiver, String message, String action) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm");
         String timestamp = sdf.format(new Date());
-        return user1 + " sent message to " + user2 + ". Message: \"" + message + "\" " + timestamp + "\n";
+        if ("sent".equals(action)) {
+            return sender + " sent a message to " + receiver + ". Message: \"" + message + "\" Time: " + timestamp + "\n";
+        } else if ("received".equals(action)) {
+            return receiver + " received a message from " + sender + ". Message: \"" + message + "\" Time: " + timestamp + "\n";
+        }
+        return "";
     }
 
     // Skriver loggposten till filen
@@ -53,3 +63,4 @@ public class FileController {
         }
     }
 }
+

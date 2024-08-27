@@ -1,7 +1,6 @@
 Username: Marcus
 Iconpath: icons/icon2.png
 Activity Log:
-Alex sent message to Marcus. Message: "Alex skickar till Marcus" 26/08/24 20:46
-Alex sent message to Marcus. Message: "Alex skickar till Marcus" 26/08/24 20:46
-Alex sent message to Marcus. Message: "Alex skickar tisdagsmeddelande till Marcus" 27/08/24 11:25
-Alex sent message to Marcus. Message: "Alex skickar tisdagsmeddelande till Marcus" 27/08/24 11:29
+Alex received message to Marcus. Message: "från marcus till alex" 27/08/24 16:03
+Marcus sent a message to [model.User@1f2e3e]. Message: "Marcus till Alex" Time: 27/08/2024 16:08
+Marcus received a message from Alex. Message: "Alex skickar till marcus kl 1610" Time: 27/08/2024 16:10

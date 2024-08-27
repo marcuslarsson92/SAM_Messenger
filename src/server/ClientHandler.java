@@ -46,8 +46,8 @@ public class ClientHandler implements Runnable {
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         } finally {
-            server.removeUser(user);
-            closeConnection();
+            //server.removeUser(user);
+            //closeConnection();
         }
     }
 
@@ -66,13 +66,13 @@ public class ClientHandler implements Runnable {
 
             System.out.println("FileController created for: " + user.getName());
 
-            fileController.logMessageSent(msg.getSender().getName(), getReceiverNames(msg), msg.getText());
+            //fileController.logMessageSent(msg.getSender().getName(), getReceiverNames(msg), msg.getText());
             System.out.println("FÖRSTA LOGMESSAGESENT, msg.getSender() = " + msg.getSender().getName());
 
             for (User receiver : msg.getReceivers()) {
-                FileController receiverFC = receiverFCs.computeIfAbsent(receiver, n -> new FileController(receiver));
-                System.out.println("Receiver.getname = " + receiver.getName());
-                receiverFC.logMessageSent(msg.getSender().getName(), receiver.getName(), msg.getText());
+                //FileController receiverFC = receiverFCs.computeIfAbsent(receiver, n -> new FileController(receiver));
+                //System.out.println("Receiver.getname = " + receiver.getName());
+                //receiverFC.logMessageSent(msg.getSender().getName(), receiver.getName(), msg.getText());
             }
 
         } catch (IOException e) {
@@ -100,5 +100,9 @@ public class ClientHandler implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void logMessage(String message) {
+        System.out.println(message);
     }
 }
