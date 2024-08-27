@@ -58,8 +58,14 @@ public class Server {
 
     // Method for logging messages, which calls ServerView's logMessage method
     public void logMessage(String message) {
+        /*
         if (view != null) {
             view.logMessage(message);
+        }
+
+         */
+        if (view != null) {
+            SwingUtilities.invokeLater(() -> view.logMessage(message));  // Uppdatera GUI på EDT
         }
         System.out.println(message); // Fallback if no view is set
     }

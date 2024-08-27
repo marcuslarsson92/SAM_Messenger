@@ -20,7 +20,6 @@ public class Client {
     private ObjectOutputStream out;
     private MessageListener messageListener;
     private UserListListener userListListener;
-
     private ClientView view;
 
     // Katalog för användarfiler

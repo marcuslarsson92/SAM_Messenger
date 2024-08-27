@@ -20,8 +20,16 @@ public class ServerView extends JFrame {
         setLocationRelativeTo(null);
 
         logArea = new JTextArea();
-        logArea.setEditable(true);
+        logArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(logArea);
+/*
+        logArea = new JTextArea();
+        logArea.setEditable(false);
+        add(new JScrollPane(logArea));
+        setSize(400, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+ */
 
         startButton = new JButton("Start Server");
         stopButton = new JButton("Stop Server");

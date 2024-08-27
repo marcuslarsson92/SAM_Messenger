@@ -8,7 +8,6 @@ import javax.swing.*;
 import java.io.IOException;
 
 public class Client2 {
-
         public static void main(String[] args) {
             SwingUtilities.invokeLater(() -> {
                 ClientView view = new ClientView();
@@ -16,6 +15,4 @@ public class Client2 {
                 new ClientViewController(view);
             });
         }
-
-
 }
