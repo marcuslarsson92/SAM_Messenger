@@ -9,6 +9,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.stream.Collectors;
 
 public class Server {
     private final int port;
@@ -96,24 +97,35 @@ public class Server {
         return new ArrayList<>(allUsers);
     }
 
-    public synchronized void sendMessage(Message message) {
+    synchronized void sendMessage(Message message) {
         boolean delivered = false;
+
+        // Skapa en FileController för avsändaren
+        FileController senderFileController = new FileController(message.getSender());
+        String senderName = message.getSender().getName();
+        String receiverNames = message.getReceivers().stream().map(User::getName).collect(Collectors.joining(", "));
+        senderFileController.logMessageSent(senderName, receiverNames, message.getText());
+
         for (User receiver : message.getReceivers()) {
             ClientHandler handler = getClientHandler(receiver);
             if (handler != null) {
                 handler.sendMessage(message);
                 delivered = true;
+
+                // Skapa en FileController för mottagaren
+                FileController receiverFileController = new FileController(receiver);
+                receiverFileController.logMessageReceived(senderName, receiver.getName(), message.getText());
             }
         }
+
         if (!delivered) {
             undeliveredMessages.add(message);
-            logMessage("Message from " + message.getSender().getName() + " to " +
-                    message.getReceivers().toString() + " queued");
+            logMessage("Message from " + senderName + " to " + receiverNames + " queued");
         } else {
-            logMessage("Message from " + message.getSender().getName() + " to " +
-                    message.getReceivers().toString() + " delivered");
+            logMessage("Message from " + senderName + " to " + receiverNames + " delivered");
         }
     }
+
     private ClientHandler getClientHandler(User user) {
         for (ClientHandler handler : clientHandlers) {
             if (handler.getUser().getName().equals(user.getName())) {
@@ -132,11 +144,18 @@ public class Server {
                 if (handler != null) {
                     handler.sendMessage(message);
                     iterator.remove();
+
+                    // Logga att meddelandet levererades till användaren
+                    FileController fileController = new FileController(user);
+                    fileController.logMessageReceived(message.getSender().getName(),
+                            user.getName(), message.getText());
+
                     logMessage("Queued message delivered to " + user.getName());
                 }
             }
         }
     }
+
     public static void main(String[] args) {
         Server server = new Server(12345);
 
