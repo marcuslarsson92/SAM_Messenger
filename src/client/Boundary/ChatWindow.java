@@ -1,11 +1,10 @@
-package client;
+package client.Boundary;
 
 
-import client.Client;
-import model.Message;
-import model.User;
+import client.Control.Client;
+import client.Entity.Message;
+import client.Entity.User;
 
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.filechooser.FileSystemView;
 import javax.swing.text.BadLocationException;

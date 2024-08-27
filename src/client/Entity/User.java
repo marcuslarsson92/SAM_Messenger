@@ -1,8 +1,6 @@
-package model;
+package client.Entity;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import java.awt.*;
 import java.io.Serializable;
 
 public class User implements Serializable {

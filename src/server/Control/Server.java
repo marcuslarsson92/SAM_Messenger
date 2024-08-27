@@ -1,7 +1,7 @@
 package server.Control;
 
-import model.Message;
-import model.User;
+import client.Entity.Message;
+import client.Entity.User;
 import server.Boundary.ServerView;
 
 import javax.swing.*;
@@ -135,7 +135,7 @@ public class Server {
         Server server = new Server(12345);
 
         SwingUtilities.invokeLater(() -> {
-            ServerView serverView = new ServerView();
+            ServerView serverView = new ServerView(server);
             server.setView(serverView);
             serverView.setVisible(true);
         });

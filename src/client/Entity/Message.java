@@ -1,9 +1,8 @@
-package model;
+package client.Entity;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.swing.Icon;
 
 public class Message implements Serializable {

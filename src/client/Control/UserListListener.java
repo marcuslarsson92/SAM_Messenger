@@ -1,6 +1,6 @@
-package client;
+package client.Control;
 
-import model.User;
+import client.Entity.User;
 
 import java.util.List;
 

@@ -1,8 +1,7 @@
 package server.Control;
 
-import model.Message;
-import model.User;
-import server.Control.Server;
+import client.Entity.Message;
+import client.Entity.User;
 
 import java.io.*;
 import java.net.Socket;

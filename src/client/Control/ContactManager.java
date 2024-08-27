@@ -1,4 +1,6 @@
-package model;
+package client.Control;
+
+import client.Entity.User;
 
 import java.util.ArrayList;
 import java.util.List;

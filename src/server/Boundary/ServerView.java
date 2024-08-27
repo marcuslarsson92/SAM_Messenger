@@ -12,7 +12,8 @@ public class ServerView extends JFrame {
     private JButton stopButton;
     private Server server;
 
-    public ServerView() {
+    public ServerView(Server server) {
+        this.server = server;
         setTitle("Server Log");
         setSize(500, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
