@@ -21,8 +21,7 @@ public class Client {
     private MessageListener messageListener;
     private UserListListener userListListener;
     private ClientView view;
-
-    // Katalog för användarfiler
+    private ChatController chatController;
     private final String userFilesDirectory = "res/userFiles/";
 
     public Client(User user, String serverAddress, int serverPort) throws IOException {
@@ -34,7 +33,6 @@ public class Client {
         // Skicka användarinformation till servern
         out.writeObject(user);
 
-        // Starta lyssnaren i en egen tråd
         new Thread(new Listener()).start();
     }
 
@@ -78,8 +76,10 @@ public class Client {
         System.out.println("username: " + username + " selected icon: " + selectedIcon);
 
         try {
-            Client client = new Client(user, "localhost", 12345);
-            ChatView chatView = new ChatView(client); // Använd din befintliga ChatView-klass här
+            ChatController chatController = new ChatController(this, null);
+            //Detta ska nog vara med Client client = new Client(user, "localhost", 12345);
+            ChatView chatView = new ChatView(chatController); // Använd din befintliga ChatView-klass här
+            chatController.setView(chatView);
             chatView.setVisible(true);
             view.setVisible(false);
         } catch (IOException e) {

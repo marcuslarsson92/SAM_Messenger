@@ -1,6 +1,6 @@
 package client.Boundary;
+
 import client.Control.ChatController;
-import client.Control.Client;
 import client.Entity.User;
 
 import javax.swing.*;
@@ -10,24 +10,32 @@ public class ChatView extends JFrame {
 
     private JList<Object> userList;
     private DefaultListModel<Object> userListModel;
-    private ChatController chatController;
     private JLabel loggedInAsLabel;
     private JButton groupChatButton;
+    private ChatController chatController;
 
-    public ChatView(Client client) {
-        this.setController(new ChatController(client, this));
+    public ChatView(ChatController chatController) {
+        this.chatController = chatController;
 
-        setTitle("Chat Application - " + client.getUser().getName());
+        SwingUtilities.invokeLater(() -> {
+            initComponents();
+            chatController.updateUserList(); // Uppdatera listan efter att komponenterna är initialiserade
+            setVisible(true); // Se till att fönstret visas efter att komponenterna har ställts in
+        });
+    }
+
+    private void initComponents() {
+        setTitle("Chat Application - " + chatController.getClient().getUser().getName());
         setSize(500, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        ImageIcon userIcon = client.getUser().getIcon();
+        ImageIcon userIcon = chatController.getClient().getUser().getIcon();
         if (userIcon != null) {
             Image scaledImage = userIcon.getImage().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
             userIcon = new ImageIcon(scaledImage);
         }
-        String loggedInText = "Logged in as: " + client.getUser().getName();
+        String loggedInText = "Logged in as: " + chatController.getClient().getUser().getName();
         loggedInAsLabel = new JLabel(loggedInText, userIcon, JLabel.LEFT);
 
         userListModel = new DefaultListModel<>();
@@ -49,27 +57,25 @@ public class ChatView extends JFrame {
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(groupChatButton);
+
         JPanel leftPanel = new JPanel(new BorderLayout());
         leftPanel.add(loggedInAsLabel, BorderLayout.NORTH);
         leftPanel.add(userScrollPane, BorderLayout.CENTER);
+
         add(buttonPanel, BorderLayout.SOUTH);
         add(leftPanel, BorderLayout.CENTER);
     }
 
-    public void setController(ChatController chatController) {
-        this.chatController = chatController;
-    }
-
     public void clearUserList() {
-        userListModel.clear();
+        SwingUtilities.invokeLater(() -> userListModel.clear());
     }
 
     public void addUserListElement(Object element) {
-        userListModel.addElement(element);
+        SwingUtilities.invokeLater(() -> userListModel.addElement(element));
     }
 
     public void repaintUserList() {
-        userList.repaint();
+        SwingUtilities.invokeLater(() -> userList.repaint());
     }
 
     private class UserListCellRenderer extends DefaultListCellRenderer {
@@ -95,7 +101,6 @@ public class ChatView extends JFrame {
                 label.setForeground(list.getForeground());
             }
 
-            // Om det är en användare
             if (value instanceof User) {
                 User user = (User) value;
 
@@ -108,7 +113,7 @@ public class ChatView extends JFrame {
                 }
 
                 label.setText(user.getName());
-                label.setHorizontalTextPosition(JLabel.RIGHT);  // Placera texten till höger om bilden
+                label.setHorizontalTextPosition(JLabel.RIGHT);
 
                 // Lägg till en checkbox
                 JCheckBox contactCheckBox = new JCheckBox();
@@ -122,28 +127,26 @@ public class ChatView extends JFrame {
                     chatController.updateUserList();
                 });
 
-                panel.add(label, BorderLayout.WEST);  // Placera till vänster
-                panel.add(contactCheckBox, BorderLayout.EAST);  // Placera checkboxen till höger
-                panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));  // Lägg till lite padding
+                panel.add(label, BorderLayout.WEST);
+                panel.add(contactCheckBox, BorderLayout.EAST);
+                panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 
                 return panel;
 
-            } else if (value instanceof String) {  // Om det är en sektion ("Online:" eller "Offline:")
+            } else if (value instanceof String) {
                 String stringValue = (String) value;
                 label.setText(stringValue);
                 if (stringValue.equals("Online:") || stringValue.equals("Offline:")) {
                     label.setFont(label.getFont().deriveFont(Font.BOLD));
-                    label.setHorizontalAlignment(JLabel.LEFT);  // Justera till vänster
-                    panel.add(label, BorderLayout.WEST);  // Lägg till etiketten till vänster
+                    label.setHorizontalAlignment(JLabel.LEFT);
+                    panel.add(label, BorderLayout.WEST);
                     return panel;
                 }
             }
 
-            panel.add(label, BorderLayout.WEST);  // Lägg till etiketten till vänster för övriga strängar
-            panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));  // Lägg till lite padding
+            panel.add(label, BorderLayout.WEST);
+            panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
             return panel;
         }
     }
 }
-
-

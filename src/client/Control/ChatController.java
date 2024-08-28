@@ -1,10 +1,9 @@
 package client.Control;
 
-import client.Control.Client;
-import client.Entity.Message;
-import client.Entity.User;
 import client.Boundary.ChatView;
 import client.Boundary.ChatWindow;
+import client.Entity.Message;
+import client.Entity.User;
 
 import javax.sound.sampled.*;
 import javax.swing.*;
@@ -18,6 +17,7 @@ public class ChatController {
 
     private Client client;
     private ChatView view;
+
     private List<User> users;
     private DefaultListModel<Object> newMessageUsers;
     private Map<String, ChatWindow> chatWindows;
@@ -161,6 +161,10 @@ public class ChatController {
 
     public Set<User> getContacts() {
         return contacts;
+    }
+
+    public void setView(ChatView view) {
+        this.view = view;
     }
 
     public DefaultListModel<Object> getNewMessageUsers() {
