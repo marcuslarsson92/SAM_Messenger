@@ -14,9 +14,7 @@ public class ChatView extends JFrame {
     private JButton groupChatButton;
     private ChatController chatController;
 
-    public ChatView(ChatController chatController) {
-        this.chatController = chatController;
-
+    public ChatView() {
         SwingUtilities.invokeLater(() -> {
             initComponents();
             chatController.updateUserList(); // Uppdatera listan efter att komponenterna är initialiserade
@@ -76,6 +74,14 @@ public class ChatView extends JFrame {
 
     public void repaintUserList() {
         SwingUtilities.invokeLater(() -> userList.repaint());
+    }
+
+    public ChatController getChatController() {
+        return chatController;
+    }
+
+    public void setChatController(ChatController chatController) {
+        this.chatController = chatController;
     }
 
     private class UserListCellRenderer extends DefaultListCellRenderer {

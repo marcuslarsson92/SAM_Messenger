@@ -16,22 +16,22 @@ import java.util.List;
 public class ChatController {
 
     private Client client;
-    private ChatView view;
+    private ChatView chatView;
 
     private List<User> users;
     private DefaultListModel<Object> newMessageUsers;
     private Map<String, ChatWindow> chatWindows;
     private Set<User> contacts;
 
-    public ChatController(Client client, ChatView view) {
+    public ChatController(Client client, ChatView chatView) {
         this.client = client;
-        this.view = view;
+        this.chatView = chatView;
         this.users = new ArrayList<>();
         this.newMessageUsers = new DefaultListModel<>();
         this.chatWindows = new HashMap<>();
         this.contacts = new HashSet<>();
 
-        this.view.setController(this);
+        this.chatView.setChatController(this);
 
         client.setMessageListener(this::handleIncomingMessage);
         client.setUserListListener(updatedUsers -> {
@@ -45,7 +45,7 @@ public class ChatController {
             User selectedUser = (User) selectedValue;
             if (newMessageUsers.contains(selectedUser)) {
                 newMessageUsers.removeElement(selectedUser);
-                view.repaintUserList();
+                chatView.repaintUserList();
             }
             openChatWindow(selectedUser.getName());
         }
@@ -76,21 +76,21 @@ public class ChatController {
 
     public void updateUserList() {
         SwingUtilities.invokeLater(() -> {
-            view.clearUserList();
+            chatView.clearUserList();
 
             // Lägg till sektion för online användare
-            view.addUserListElement("Online:");
+            chatView.addUserListElement("Online:");
             for (User user : users) {
                 if (!user.getName().equals(client.getUser().getName())) {
-                    view.addUserListElement(user);
+                    chatView.addUserListElement(user);
                 }
             }
 
             // Lägg till ett tomt utrymme för separation
-            view.addUserListElement(" ");
+            chatView.addUserListElement(" ");
 
             // Lägg till sektion för offline användare
-            view.addUserListElement("Offline:");
+            chatView.addUserListElement("Offline:");
             List<String> allUsernames = loadAllUsernames();
             for (String username : allUsernames) {
                 boolean isOnline = false;
@@ -101,7 +101,7 @@ public class ChatController {
                     }
                 }
                 if (!isOnline) {
-                    view.addUserListElement(username);
+                    chatView.addUserListElement(username);
                 }
             }
         });
@@ -113,9 +113,9 @@ public class ChatController {
             return chatWindows.computeIfAbsent(username, k -> {
                 ChatWindow chatWindow = new ChatWindow(client, user);
 
-                Point mainWindowLocation = view.getLocation();
-                int mainWindowWidth = view.getWidth();
-                int mainWindowHeight = view.getHeight();
+                Point mainWindowLocation = chatView.getLocation();
+                int mainWindowWidth = chatView.getWidth();
+                int mainWindowHeight = chatView.getHeight();
 
                 int chatWindowWidth = chatWindow.getWidth();
                 int chatWindowHeight = chatWindow.getHeight();
@@ -142,7 +142,7 @@ public class ChatController {
         User sender = getUserByName(senderName);
         if (sender != null && !newMessageUsers.contains(sender)) {
             newMessageUsers.addElement(sender);
-            view.repaintUserList();
+            chatView.repaintUserList();
         }
         playNotificationSound();
     }
@@ -159,12 +159,16 @@ public class ChatController {
         }
     }
 
+    public Client getClient() {
+        return client;
+    }
+
     public Set<User> getContacts() {
         return contacts;
     }
 
-    public void setView(ChatView view) {
-        this.view = view;
+    public void setView(ChatView chatvView) {
+        this.chatView = chatView;
     }
 
     public DefaultListModel<Object> getNewMessageUsers() {

@@ -2,3 +2,5 @@ Username: Alex
 Iconpath: icons/icon1.png
 Activity Log:
 Alex received a message from Marcus. Message: "Marcus skickar första gruppmeddelandet till Alex och Simon" Time: 28/08/2024 01:22
+Alex sent a message to Marcus. Message: "Alex skickar till Marcus 9,51" Time: 28/08/2024 09:51
+Alex sent a message to Marcus, Simon. Message: "Hej Marcus och Simon. Alex skickar 09,57." Time: 28/08/2024 09:57

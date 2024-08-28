@@ -1,17 +1,16 @@
 package client.Control;
 
 import client.Boundary.ChatView;
-import client.Boundary.ClientView;
-import client.Control.Client;
+import client.Boundary.LoginView;
 import client.Entity.User;
 
 import java.io.IOException;
-public class ClientViewController {
-    private ClientView view;
+public class LoginController {
+    private LoginView view;
     private Client client;
     private ChatController chatController;
 
-    public ClientViewController(ClientView view) {
+    public LoginController(LoginView view) {
         this.view = view;
         this.view.setConnectButtonListener(e -> connect());
     }
@@ -29,8 +28,9 @@ public class ClientViewController {
         try {
             client = new Client(user, "localhost", 12345);
             client.setView(view);
-            ChatView chatView = new ChatView(client);
+            ChatView chatView = new ChatView();
             chatController = new ChatController(client, chatView);
+            //chatView.setChatController(chatController); inne i ChatController constructor sets chatView(setChatController(this));
             chatView.setVisible(true);
             view.setVisible(false);
         } catch (IOException ex) {

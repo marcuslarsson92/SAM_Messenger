@@ -1,13 +1,10 @@
 package client.Control;
 
 import client.Boundary.ChatView;
-import client.Control.MessageListener;
-import client.Control.UserListListener;
 import client.Entity.Message;
 import client.Entity.User;
-import client.Boundary.ClientView;
+import client.Boundary.LoginView;
 
-import javax.swing.*;
 import java.io.*;
 import java.net.Socket;
 import java.util.List;
@@ -20,7 +17,7 @@ public class Client {
     private ObjectOutputStream out;
     private MessageListener messageListener;
     private UserListListener userListListener;
-    private ClientView view;
+    private LoginView view;
     private ChatController chatController;
     private final String userFilesDirectory = "res/userFiles/";
 
@@ -36,7 +33,7 @@ public class Client {
         new Thread(new Listener()).start();
     }
 
-    public void setView(ClientView view) {
+    public void setView(LoginView view) {
         this.view = view;
 
         // Registrera action listener för anslutningsknappen
@@ -75,17 +72,12 @@ public class Client {
         user = new User(username, selectedIcon);
         System.out.println("username: " + username + " selected icon: " + selectedIcon);
 
-        try {
-            ChatController chatController = new ChatController(this, null);
-            //Detta ska nog vara med Client client = new Client(user, "localhost", 12345);
-            ChatView chatView = new ChatView(chatController); // Använd din befintliga ChatView-klass här
-            chatController.setView(chatView);
-            chatView.setVisible(true);
-            view.setVisible(false);
-        } catch (IOException e) {
-            e.printStackTrace();
-            view.showErrorMessage("Connection failed");
-        }
+        ChatController chatController = new ChatController(this, null);
+        ChatView chatView = new ChatView();
+        chatController.setView(chatView);
+        chatView.setChatController(chatController);
+        chatView.setVisible(true);
+        view.setVisible(false);
     }
 
     private void createUserFile(File userFile, String username, String selectedIcon) {

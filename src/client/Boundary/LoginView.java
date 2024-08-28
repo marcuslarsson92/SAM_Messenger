@@ -4,7 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
-public class ClientView extends JFrame {
+public class LoginView extends JFrame {
     private JTextField usernameField;
     private JRadioButton[] iconButtons;
     private JButton connectButton;
@@ -17,7 +17,7 @@ public class ClientView extends JFrame {
             "icons/icon4.png"
     };
 
-    public ClientView() {
+    public LoginView() {
         setTitle("Client Connection");
         setSize(500, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

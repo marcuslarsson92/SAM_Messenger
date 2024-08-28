@@ -1,18 +1,15 @@
 package client.Control;
 
-import client.Boundary.ChatView;
-import client.Boundary.ClientView;
-import client.Entity.User;
+import client.Boundary.LoginView;
 
 import javax.swing.*;
-import java.io.IOException;
 
 public class Client2 {
         public static void main(String[] args) {
             SwingUtilities.invokeLater(() -> {
-                ClientView view = new ClientView();
+                LoginView view = new LoginView();
                 view.setVisible(true);
-                new ClientViewController(view);
+                new LoginController(view);
             });
         }
 }
