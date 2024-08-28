@@ -5,16 +5,29 @@ import client.Boundary.LoginView;
 import client.Entity.User;
 
 import java.io.IOException;
+
+/**
+ * The type Login controller.
+ */
 public class LoginController {
     private LoginView view;
     private Client client;
     private ChatController chatController;
 
+    /**
+     * Instantiates a new Login controller.
+     *
+     * @param view the view
+     */
     public LoginController(LoginView view) {
         this.view = view;
         this.view.setConnectButtonListener(e -> connect());
     }
-
+    /**
+     * Establish a connection to the server using the provided username and selected icon.
+     * If successful, a new chat window is opened, and the current view is hidden.
+     * If the username or icon is missing, or the connection fails, an error message is shown.
+     */
     private void connect() {
         String username = view.getUsername();
         String selectedIcon = view.getSelectedIcon();

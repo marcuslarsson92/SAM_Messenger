@@ -10,6 +10,9 @@ import java.net.Socket;
 import java.util.List;
 import java.util.Scanner;
 
+/**
+ * The type Client.
+ */
 public class Client {
     private User user;
     private Socket socket;
@@ -21,6 +24,14 @@ public class Client {
     private ChatController chatController;
     private final String userFilesDirectory = "res/userFiles/";
 
+    /**
+     * Instantiates a new Client.
+     *
+     * @param user          the user
+     * @param serverAddress the server address
+     * @param serverPort    the server port
+     * @throws IOException the io exception
+     */
     public Client(User user, String serverAddress, int serverPort) throws IOException {
         this.user = user;
         this.socket = new Socket(serverAddress, serverPort);
@@ -33,6 +44,11 @@ public class Client {
         new Thread(new Listener()).start();
     }
 
+    /**
+     * Sets view.
+     *
+     * @param view the view
+     */
     public void setView(LoginView view) {
         this.view = view;
 
@@ -40,21 +56,46 @@ public class Client {
         view.setConnectButtonListener(e -> handleLogin());
     }
 
+    /**
+     * Gets user.
+     *
+     * @return the user
+     */
     public User getUser() {
         return user;
     }
 
+    /**
+     * Send message.
+     *
+     * @param message the message
+     * @throws IOException the io exception
+     */
     public void sendMessage(Message message) throws IOException {
         out.writeObject(message);
     }
 
+    /**
+     * Sets message listener.
+     *
+     * @param messageListener the message listener
+     */
     public void setMessageListener(MessageListener messageListener) {
         this.messageListener = messageListener;
     }
 
+    /**
+     * Sets user list listener.
+     *
+     * @param userListListener the user list listener
+     */
     public void setUserListListener(UserListListener userListListener) {
         this.userListListener = userListListener;
     }
+
+    /**
+     * Handle login function
+     */
 
     private void handleLogin() {
         String username = view.getUsername();
@@ -80,6 +121,13 @@ public class Client {
         view.setVisible(false);
     }
 
+    /**
+     * Creates file for new user
+     * @param userFile
+     * @param username
+     * @param selectedIcon
+     */
+
     private void createUserFile(File userFile, String username, String selectedIcon) {
         try {
             // Kontrollera att katalogen finns, annars skapa den
@@ -104,6 +152,11 @@ public class Client {
         }
     }
 
+    /**
+     * Load user file
+     * @param userFile
+     */
+
     private void loadUserFile(File userFile) {
         try {
             Scanner scanner = new Scanner(userFile);
@@ -117,8 +170,16 @@ public class Client {
             e.printStackTrace();
         }
     }
-
+    /**
+     * Listener is a background task that continuously listens for incoming objects
+     * from the server over a socket connection. Depending on the type of object received,
+     * it triggers the appropriate listener: either to handle a message or to update the user list.
+     */
     private class Listener implements Runnable {
+        /**
+         * Continuously listens for incoming objects from the server,
+         * processes them, and delegates to the appropriate listener.
+         */
         @Override
         public void run() {
             try {

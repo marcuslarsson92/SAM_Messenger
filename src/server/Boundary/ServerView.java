@@ -6,12 +6,20 @@ import javax.swing.*;
 import java.awt.*;
 import java.time.LocalDateTime;
 
+/**
+ * The type Server view.
+ */
 public class ServerView extends JFrame {
     private JTextArea logArea;
     private JButton startButton;
     private JButton stopButton;
     private Server server;
 
+    /**
+     * Instantiates a new Server view.
+     *
+     * @param server the server
+     */
     public ServerView(Server server) {
         this.server = server;
         setTitle("Server Log");
@@ -38,7 +46,12 @@ public class ServerView extends JFrame {
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    // GUI-method to log messages
+    /**
+     * Log message.
+     *
+     * @param message the message
+     */
+// GUI-method to log messages
     public void logMessage(String message) {
         logArea.append(message + "\n");
     }

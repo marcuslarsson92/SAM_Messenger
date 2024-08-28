@@ -4,3 +4,12 @@ Activity Log:
 Marcus sent a message to Alex, Simon. Message: "Marcus skickar första gruppmeddelandet till Alex och Simon" Time: 28/08/2024 01:22
 Marcus received a message from Alex. Message: "Alex skickar till Marcus 9,51" Time: 28/08/2024 09:51
 Marcus received a message from Alex. Message: "Hej Marcus och Simon. Alex skickar 09,57." Time: 28/08/2024 09:57
+Marcus sent a message to Alex. Message: "Hej" Time: 28/08/2024 11:36
+Marcus received a message from Alex. Message: "hej" Time: 28/08/2024 11:36
+Marcus received a message from Alex. Message: "Hej" Time: 28/08/2024 11:41
+Marcus sent a message to Alex. Message: "null" Time: 28/08/2024 11:41
+Marcus sent a message to Alex. Message: "hej" Time: 28/08/2024 11:41
+Marcus received a message from Alex. Message: "hejhej" Time: 28/08/2024 11:41
+Marcus received a message from Alex. Message: "ful bild" Time: 28/08/2024 11:41
+Marcus sent a message to Alex. Message: "Hej" Time: 28/08/2024 11:45
+Marcus sent a message to Alex. Message: "null" Time: 28/08/2024 11:45

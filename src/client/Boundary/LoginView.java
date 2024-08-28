@@ -4,12 +4,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 
+/**
+ * The type Login view.
+ */
 public class LoginView extends JFrame {
     private JTextField usernameField;
     private JRadioButton[] iconButtons;
     private JButton connectButton;
-
-    // Ikonbanor
     private String[] iconPaths = {
             "icons/icon1.png",
             "icons/icon2.png",
@@ -17,6 +18,9 @@ public class LoginView extends JFrame {
             "icons/icon4.png"
     };
 
+    /**
+     * Instantiates a new Login view.
+     */
     public LoginView() {
         setTitle("Client Connection");
         setSize(500, 300);
@@ -61,8 +65,11 @@ public class LoginView extends JFrame {
         connectButton = new JButton("Connect");
         add(connectButton, BorderLayout.SOUTH);
     }
-
-    // Skapar en ImageIcon från en given sökväg
+    /**
+     * Creates ImageIcon from given search path.
+     *
+     * @return ImageIcon
+     */
     private ImageIcon createImageIcon(String path) {
         java.net.URL imgURL = getClass().getResource("/" + path);
         if (imgURL != null) {
@@ -73,12 +80,20 @@ public class LoginView extends JFrame {
         }
     }
 
-    // Returnerar användarnamn
+    /**
+     * Gets username.
+     *
+     * @return the username
+     */
     public String getUsername() {
         return usernameField.getText().trim();
     }
 
-    // Returnerar vald ikon
+    /**
+     * Gets selected icon.
+     *
+     * @return the selected icon
+     */
     public String getSelectedIcon() {
         for (int i = 0; i < iconButtons.length; i++) {
             if (iconButtons[i].isSelected()) {
@@ -88,12 +103,20 @@ public class LoginView extends JFrame {
         return null;
     }
 
-    // Sätter action listener för connect-knappen
+    /**
+     * Sets connect button listener.
+     *
+     * @param listener the listener
+     */
     public void setConnectButtonListener(ActionListener listener) {
         connectButton.addActionListener(listener);
     }
 
-    // Visar ett felmeddelande
+    /**
+     * Show error message.
+     *
+     * @param message the message
+     */
     public void showErrorMessage(String message) {
         JOptionPane.showMessageDialog(this, message);
     }

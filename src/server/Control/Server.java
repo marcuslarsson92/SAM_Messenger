@@ -11,6 +11,9 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
+/**
+ * The type Server.
+ */
 public class Server {
     private final int port;
     private Set<ClientHandler> clientHandlers = ConcurrentHashMap.newKeySet();
@@ -20,15 +23,27 @@ public class Server {
     private ServerView view;
     private List<User> allUsers = new ArrayList<>(); // Lista över alla registrerade användare
 
+    /**
+     * Instantiates a new Server.
+     *
+     * @param port the port
+     */
     public Server(int port) {
         this.port = port;
     }
 
-    // Method to set the ServerView, so the Server can log messages
+    /**
+     * Sets view.
+     *
+     * @param view the view
+     */
     public void setView(ServerView view) {
         this.view = view;
     }
 
+    /**
+     * Start server.
+     */
     public void start() {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             logMessage("Server started on port " + port);
@@ -49,6 +64,9 @@ public class Server {
         }
     }
 
+    /**
+     * Stop server.
+     */
     public void stopServer() {
         running = false;
         for (ClientHandler clientHandler : clientHandlers) {
@@ -57,20 +75,20 @@ public class Server {
         logMessage("Server stopped");
     }
 
-    // Method for logging messages, which calls ServerView's logMessage method
+    /**
+     * Method for logging messages, which calls ServerView's logMessage method
+     *
+     * @param message the message
+     */
     public void logMessage(String message) {
-        /*
-        if (view != null) {
-            view.logMessage(message);
-        }
-
-         */
         if (view != null) {
             SwingUtilities.invokeLater(() -> view.logMessage(message));  // Uppdatera GUI på EDT
         }
-        System.out.println(message); // Fallback if no view is set
     }
 
+    /**
+     * Broadcast user update.
+     */
     public synchronized void broadcastUserUpdate() {
         List<User> userList = new ArrayList<>(connectedUsers.values());
         for (ClientHandler clientHandler : clientHandlers) {
@@ -78,6 +96,11 @@ public class Server {
         }
     }
 
+    /**
+     * Add user.
+     *
+     * @param user the user
+     */
     public synchronized void addUser(User user) {
         if (!allUsers.contains(user)) {
             allUsers.add(user);
@@ -88,15 +111,31 @@ public class Server {
 
     }
 
+    /**
+     * Remove user.
+     *
+     * @param user the user
+     */
     public synchronized void removeUser(User user) {
         connectedUsers.remove(user.getName());
         logMessage("User disconnected: " + user.getName());
         broadcastUserUpdate();
     }
+
+    /**
+     * Gets all users.
+     *
+     * @return the all users
+     */
     public synchronized List<User> getAllUsers() {
         return new ArrayList<>(allUsers);
     }
 
+    /**
+     * Send message.
+     *
+     * @param message the message
+     */
     synchronized void sendMessage(Message message) {
         boolean delivered = false;
 
@@ -126,6 +165,11 @@ public class Server {
         }
     }
 
+    /**
+     * Get clientHandler
+     * @param user the user
+     * @return ClientHandler
+     */
     private ClientHandler getClientHandler(User user) {
         for (ClientHandler handler : clientHandlers) {
             if (handler.getUser().getName().equals(user.getName())) {
@@ -135,6 +179,11 @@ public class Server {
         return null;
     }
 
+    /**
+     * Deliver undelivered messages.
+     *
+     * @param user the user
+     */
     public void deliverUndeliveredMessages(User user) {
         Iterator<Message> iterator = undeliveredMessages.iterator();
         while (iterator.hasNext()) {
@@ -156,6 +205,11 @@ public class Server {
         }
     }
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
     public static void main(String[] args) {
         Server server = new Server(12345);
 

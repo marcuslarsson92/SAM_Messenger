@@ -6,6 +6,9 @@ import client.Entity.User;
 import javax.swing.*;
 import java.awt.*;
 
+/**
+ * The type Chat view.
+ */
 public class ChatView extends JFrame {
 
     private JList<Object> userList;
@@ -14,6 +17,9 @@ public class ChatView extends JFrame {
     private JButton groupChatButton;
     private ChatController chatController;
 
+    /**
+     * Instantiates a new Chat view.
+     */
     public ChatView() {
         SwingUtilities.invokeLater(() -> {
             initComponents();
@@ -64,33 +70,72 @@ public class ChatView extends JFrame {
         add(leftPanel, BorderLayout.CENTER);
     }
 
+    /**
+     * Clear user list.
+     */
     public void clearUserList() {
         SwingUtilities.invokeLater(() -> userListModel.clear());
     }
 
+    /**
+     * Add user list element.
+     *
+     * @param element the element
+     */
     public void addUserListElement(Object element) {
         SwingUtilities.invokeLater(() -> userListModel.addElement(element));
     }
 
+    /**
+     * Repaint user list.
+     */
     public void repaintUserList() {
         SwingUtilities.invokeLater(() -> userList.repaint());
     }
 
+    /**
+     * Gets chat controller.
+     *
+     * @return the chat controller
+     */
     public ChatController getChatController() {
         return chatController;
     }
 
+    /**
+     * Sets chat controller.
+     *
+     * @param chatController the chat controller
+     */
     public void setChatController(ChatController chatController) {
         this.chatController = chatController;
     }
-
+    /**
+     * Custom renderer for cells in the user list, enhancing the display with user icons,
+     * names, and a checkbox for selecting contacts. Adjusts appearance based on selection
+     * and focus, and handles user interactions through the ChatController.
+     */
     private class UserListCellRenderer extends DefaultListCellRenderer {
         private ChatController chatController;
 
+        /**
+         * Instantiates a new User list cell renderer.
+         *
+         * @param chatController the chat controller
+         */
         public UserListCellRenderer(ChatController chatController) {
             this.chatController = chatController;
         }
-
+        /**
+         * Customizes the appearance and behavior of a list cell in the user list.
+         *
+         * @param list The JList we're painting.
+         * @param value The value returned by list.getModel().getElementAt(index).
+         * @param index The cell's index.
+         * @param isSelected True if the specified cell was selected.
+         * @param cellHasFocus True if the specified cell has the focus.
+         * @return The component that the renderer uses to draw the value.
+         */
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
             JPanel panel = new JPanel(new BorderLayout());

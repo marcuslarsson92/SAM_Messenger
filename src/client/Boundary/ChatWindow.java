@@ -1,6 +1,6 @@
 package client.Boundary;
 
-
+import client.Control.ChatController;
 import client.Control.Client;
 import client.Entity.Message;
 import client.Entity.User;
@@ -12,74 +12,63 @@ import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * The type Chat window.
+ */
 public class ChatWindow extends JFrame {
     private JTextPane chatPane;
     private JTextField inputField;
     private JButton sendButton;
-    private Client client;
-    private User receiver;
-    private List <User> receivers;
     private JButton attachImageButton;
+    private ChatController controller;
+    private List<User> receivers;
     private ImageIcon attachedImage;
-    private File attachedImageFile;
-    private JScrollPane chatScrollPane;
 
-    public ChatWindow(Client client, User receiver) {
-        this(client, List.of(receiver));
+    /**
+     * Instantiates a new Chat window.
+     *
+     * @param controller the controller
+     * @param client     the client
+     * @param receiver   the receiver
+     */
+    public ChatWindow(ChatController controller, Client client, User receiver) {
+        this(controller, client, List.of(receiver));
     }
-    public ChatWindow(Client client, List <User> receivers) {
-        this.client = client;
+
+    /**
+     * Instantiates a new Chat window.
+     *
+     * @param controller the controller
+     * @param client     the client
+     * @param receivers  the receivers
+     */
+    public ChatWindow(ChatController controller, Client client, List<User> receivers) {
+        this.controller = controller;
         this.receivers = receivers;
 
-        if (receivers.size() == 1) {
-            setTitle("Chat with " + receivers.get(0).getName());
-        } else {
-            setTitle("Group chat with " + getReceiverNames());
-        }
-
+        setTitle(receivers.size() == 1 ? "Chat with " + receivers.get(0).getName() : "Group chat with " + getReceiverNames());
         setSize(400, 400);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        addWindowListener(new java.awt.event.WindowAdapter() {
-            @Override
-            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                // Istället för att stänga, bara dölja fönstret
-                setVisible(false);
-            }
-        });
-
-        // Initialisera chatPane och lägg till den i chatScrollPane
         chatPane = new JTextPane();
         chatPane.setEditable(false);
-
-        chatScrollPane = new JScrollPane(chatPane);
+        JScrollPane chatScrollPane = new JScrollPane(chatPane);
         chatScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
         inputField = new JTextField();
-        attachImageButton = new JButton("Attach Image");
         sendButton = new JButton("Send");
+        sendButton.addActionListener(e -> {
+            controller.handleSendMessage(this, inputField.getText());
+            inputField.setText(""); // Töm inputfältet efter att meddelandet har skickats
+        });
 
-        sendButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                sendMessage();
-            }
-        });
-        attachImageButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                attachImage();
-            }
-        });
+        attachImageButton = new JButton("Attach Image");
+        attachImageButton.addActionListener(e -> controller.attachImage(this));
+
 
         JPanel bottomPanel = new JPanel(new BorderLayout());
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -89,76 +78,17 @@ public class ChatWindow extends JFrame {
         bottomPanel.add(inputField, BorderLayout.CENTER);
         bottomPanel.add(buttonPanel, BorderLayout.EAST);
 
+
         add(chatScrollPane, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
-    private void sendMessage() {
-        String text = inputField.getText();
-        //List<User> receivers = new ArrayList<>();
-        //receivers.add(receiver);
-
-        if (!text.isEmpty()) {
-            Message message = new Message(client.getUser(), receivers, text, null);
-            try {
-                client.sendMessage(message);
-                displayMessage(message);
-                //FileHandler senderFileHandler = new FileHandler(client.getUser().getName());
-                //senderFileHandler.logMessageSent(client.getUser().getName(), String.valueOf(receiver), message.getText());
-                inputField.setText("");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } else if (attachedImageFile != null) {
-            sendImage(attachedImage);
-        }
-    }
-
-    private void attachImage() {
-        // Skapa en JFileChooser
-        JFileChooser fileChooser = new JFileChooser();
-
-        // Få referens till "Pictures"-mappen i användarens filsystem
-        File picturesDir = FileSystemView.getFileSystemView().getDefaultDirectory();
-        File picturesFolder = new File(picturesDir, "Pictures");
-
-        // Sätt standardkatalogen till "Pictures"-mappen
-        fileChooser.setCurrentDirectory(picturesFolder);
-
-        // Visa dialogen och hantera användarens val
-        int result = fileChooser.showOpenDialog(this);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            attachedImageFile = fileChooser.getSelectedFile();
-            try {
-                attachedImage = new ImageIcon(attachedImageFile.getAbsolutePath());
-                JOptionPane.showMessageDialog(this, "Image attached successfully!");
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Failed to attach image: " + ex.getMessage());
-            }
-        }
-    }
-
-    private void sendImage(ImageIcon imageIcon) {
-        List<User> receivers = new ArrayList<>();
-        receivers.add(receiver);
-
-        Message message = new Message(client.getUser(), receivers, null, attachedImage);
-        try {
-            client.sendMessage(message);
-            displayMessage(message);
-            attachedImageFile = null;
-            attachedImage = null;
-            inputField.setText("");
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void receiveMessage(Message message) {
-        displayMessage(message);
-    }
-    private void displayMessage(Message message) {
+    /**
+     * Display message.
+     *
+     * @param message the message
+     */
+    public void displayMessage(Message message) {
         StyledDocument doc = chatPane.getStyledDocument();
 
         try {
@@ -197,7 +127,57 @@ public class ChatWindow extends JFrame {
         }
     }
 
-    // Hämta namn på alla mottagare för att visa i fönstertiteln
+
+    /**
+     * Display image.
+     *
+     * @param sender the sender
+     * @param image  the image
+     */
+    public void displayImage(String sender, ImageIcon image) {
+        StyledDocument doc = chatPane.getStyledDocument();
+
+        try {
+            // Lägg till avsändarens namn
+            doc.insertString(doc.getLength(), sender + ": ", null);
+
+            // Skala om bilden
+            Image scaledImage = image.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH);
+            ImageIcon scaledIcon = new ImageIcon(scaledImage);
+
+            // Skapa och använd en stil för att infoga den skalade bilden
+            Style style = chatPane.addStyle("ImageStyle", null);
+            StyleConstants.setIcon(style, scaledIcon);
+
+            // Infoga ett mellanslag efter namnet och sedan bilden på samma rad
+            doc.insertString(doc.getLength(), " ", null);
+            doc.insertString(doc.getLength(), " ", style);
+
+            // Lägg till en ny rad efter bilden
+            doc.insertString(doc.getLength(), "\n", null);
+
+            // Scrolla till botten
+            chatPane.setCaretPosition(doc.getLength());
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * Show file chooser file.
+     *
+     * @return the file
+     */
+    public File showFileChooser() {
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(FileSystemView.getFileSystemView().getDefaultDirectory());
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            return fileChooser.getSelectedFile();
+        }
+        return null;
+    }
     private String getReceiverNames() {
         StringBuilder names = new StringBuilder();
         for (User user : receivers) {
@@ -209,4 +189,23 @@ public class ChatWindow extends JFrame {
         return names.toString();
     }
 
+    /**
+     * Receive message.
+     *
+     * @param message the message
+     */
+    public void receiveMessage(Message message) {
+        displayMessage(message);
+    }
+
+    /**
+     * Gets receivers.
+     *
+     * @return the receivers
+     */
+    public List<User> getReceivers() {
+        return receivers;
+    }
 }
+
+

@@ -3,29 +3,58 @@ package client.Entity;
 import javax.swing.ImageIcon;
 import java.io.Serializable;
 
+/**
+ * The type User.
+ */
 public class User implements Serializable {
     private String name;
     private String icon;
     private boolean online;
 
+    /**
+     * Instantiates a new User.
+     *
+     * @param name the name
+     * @param icon the icon
+     */
     public User(String name, String icon) {
         this.name = name;
         this.icon = icon;
         this.online = false;
     }
 
+    /**
+     * Gets name.
+     *
+     * @return the name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets icon.
+     *
+     * @return the icon
+     */
     public ImageIcon getIcon() {
         return (ImageIcon) createIcon(icon);
     }
 
+    /**
+     * Sets name.
+     *
+     * @param name the name
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * Sets icon.
+     *
+     * @param icon the icon
+     */
     public void setIcon(String icon) {
         this.icon = icon;
     }
@@ -53,4 +82,6 @@ public class User implements Serializable {
     public int hashCode() {
         return name.hashCode();
     }
+
+
 }

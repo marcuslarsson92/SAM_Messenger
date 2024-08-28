@@ -13,6 +13,9 @@ import java.io.IOException;
 import java.util.*;
 import java.util.List;
 
+/**
+ * The type Chat controller.
+ */
 public class ChatController {
 
     private Client client;
@@ -22,7 +25,14 @@ public class ChatController {
     private DefaultListModel<Object> newMessageUsers;
     private Map<String, ChatWindow> chatWindows;
     private Set<User> contacts;
+    private ChatWindow chatWindow;
 
+    /**
+     * Instantiates a new Chat controller.
+     *
+     * @param client   the client
+     * @param chatView the chat view
+     */
     public ChatController(Client client, ChatView chatView) {
         this.client = client;
         this.chatView = chatView;
@@ -30,6 +40,7 @@ public class ChatController {
         this.newMessageUsers = new DefaultListModel<>();
         this.chatWindows = new HashMap<>();
         this.contacts = new HashSet<>();
+
 
         this.chatView.setChatController(this);
 
@@ -40,6 +51,11 @@ public class ChatController {
         });
     }
 
+    /**
+     * Handle user selection.
+     *
+     * @param selectedValue the selected value
+     */
     public void handleUserSelection(Object selectedValue) {
         if (selectedValue instanceof User) {
             User selectedUser = (User) selectedValue;
@@ -51,6 +67,11 @@ public class ChatController {
         }
     }
 
+    /**
+     * Get user from given username
+     * @param name
+     * @return User
+     */
     private User getUserByName(String name) {
         for (User user : users) {
             if (user.getName().equals(name)) {
@@ -59,6 +80,12 @@ public class ChatController {
         }
         return null;
     }
+
+    /**
+     * Loads all users in the system through their log file
+     *
+     * @return usernames list of all users in the system
+     */
 
     private List<String> loadAllUsernames() {
         File folder = new File("res/userFiles");
@@ -74,6 +101,9 @@ public class ChatController {
         return usernames;
     }
 
+    /**
+     * Update user list.
+     */
     public void updateUserList() {
         SwingUtilities.invokeLater(() -> {
             chatView.clearUserList();
@@ -107,11 +137,17 @@ public class ChatController {
         });
     }
 
+    /**
+     * Open chat window.
+     *
+     * @param username the username
+     * @return the chat window
+     */
     public ChatWindow openChatWindow(String username) {
         User user = getUserByName(username);
         if (user != null) {
             return chatWindows.computeIfAbsent(username, k -> {
-                ChatWindow chatWindow = new ChatWindow(client, user);
+                ChatWindow chatWindow = new ChatWindow(this, client, user);
 
                 Point mainWindowLocation = chatView.getLocation();
                 int mainWindowWidth = chatView.getWidth();
@@ -132,6 +168,11 @@ public class ChatController {
         return null;
     }
 
+    /**
+     * Message listener calls this and handles incoming messages to client
+     *
+     * @param message the message
+     */
     private void handleIncomingMessage(Message message) {
         String senderName = message.getSender().getName();
         ChatWindow chatWindow = openChatWindow(senderName);
@@ -147,6 +188,9 @@ public class ChatController {
         playNotificationSound();
     }
 
+    /**
+     * Plays notification sound
+     */
     private void playNotificationSound() {
         try {
             File soundFile = new File("res/sound/notification.wav");
@@ -159,22 +203,45 @@ public class ChatController {
         }
     }
 
+    /**
+     * Gets client.
+     *
+     * @return the client
+     */
     public Client getClient() {
         return client;
     }
 
+    /**
+     * Gets contacts.
+     *
+     * @return the contacts
+     */
     public Set<User> getContacts() {
         return contacts;
     }
 
+    /**
+     * Sets view.
+     *
+     * @param chatvView the chatv view
+     */
     public void setView(ChatView chatvView) {
         this.chatView = chatView;
     }
 
+    /**
+     * Gets new message users.
+     *
+     * @return the new message users
+     */
     public DefaultListModel<Object> getNewMessageUsers() {
         return newMessageUsers;
     }
 
+    /**
+     * New group chat.
+     */
     public void newGroupChat() {
         List<User> onlineUsers = new ArrayList<>();
         for (User user : users) {
@@ -184,7 +251,45 @@ public class ChatController {
         }
 
         // Skapa ett nytt gruppchattfönster
-        ChatWindow groupChatWindow = new ChatWindow(client, onlineUsers);
+        ChatWindow groupChatWindow = new ChatWindow(this, client, onlineUsers);
         groupChatWindow.setVisible(true);
     }
+
+    /**
+     * Handle send message.
+     *
+     * @param chatWindow the chat window
+     * @param text       the text
+     */
+    public void handleSendMessage(ChatWindow chatWindow, String text) {
+        if (!text.isEmpty()) {
+            Message message = new Message(client.getUser(), chatWindow.getReceivers(), text, null);
+            try {
+                client.sendMessage(message);
+                chatWindow.displayMessage(message);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * Attach image.
+     *
+     * @param chatWindow the chat window
+     */
+    public void attachImage(ChatWindow chatWindow) {
+        File imageFile = chatWindow.showFileChooser();
+        if (imageFile != null) {
+            try {
+                ImageIcon imageIcon = new ImageIcon(imageFile.getAbsolutePath());
+                Message message = new Message(client.getUser(), chatWindow.getReceivers(), null, imageIcon);
+                client.sendMessage(message);
+                chatWindow.displayImage(client.getUser().getName(), imageIcon);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 }

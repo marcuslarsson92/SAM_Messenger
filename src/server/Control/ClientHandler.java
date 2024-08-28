@@ -7,6 +7,9 @@ import java.io.*;
 import java.net.Socket;
 import java.util.List;
 
+/**
+ * The type Client handler.
+ */
 public class ClientHandler implements Runnable {
     private Socket socket;
     private Server server;
@@ -14,11 +17,21 @@ public class ClientHandler implements Runnable {
     private ObjectOutputStream out;
     private User user;
 
+    /**
+     * Instantiates a new Client handler.
+     *
+     * @param socket the socket
+     * @param server the server
+     */
     public ClientHandler(Socket socket, Server server) {
         this.socket = socket;
         this.server = server;
     }
-
+    /**
+     * Handles the client communication in a separate thread.
+     * This method initializes input and output streams, receives the user object, and processes incoming messages.
+     * Messages are sent to the server for delivery, and undelivered messages are handled when the user connects.
+     */
     @Override
     public void run() {
         try {
@@ -42,6 +55,11 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    /**
+     * Send user list.
+     *
+     * @param userList the user list
+     */
     public void sendUserList(List<User> userList) {
         try {
             out.writeObject(userList);
@@ -50,6 +68,11 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    /**
+     * Send message.
+     *
+     * @param message the message
+     */
     public void sendMessage(Message message) {
         try {
             message.setDeliveredTime(java.time.LocalDateTime.now());
@@ -59,10 +82,18 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    /**
+     * Gets user.
+     *
+     * @return the user
+     */
     public User getUser() {
         return user;
     }
 
+    /**
+     * Close connection.
+     */
     void closeConnection() {
         try {
             socket.close();
