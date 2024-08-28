@@ -30,7 +30,7 @@ public class LoginController {
             client.setView(view);
             ChatView chatView = new ChatView();
             chatController = new ChatController(client, chatView);
-            //chatView.setChatController(chatController); inne i ChatController constructor sets chatView(setChatController(this));
+
             chatView.setVisible(true);
             view.setVisible(false);
         } catch (IOException ex) {
