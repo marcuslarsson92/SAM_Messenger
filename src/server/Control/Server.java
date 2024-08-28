@@ -84,6 +84,7 @@ public class Server {
         if (view != null) {
             SwingUtilities.invokeLater(() -> view.logMessage(message));  // Uppdatera GUI på EDT
         }
+        System.out.println(message);
     }
 
     /**
