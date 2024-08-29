@@ -36,14 +36,20 @@ public class FileController {
         }
     }
 
-    /**
-     * Log message sent.
-     *
-     * @param sender   the sender
-     * @param receiver the receiver
-     * @param message  the message
-     */
-// Loggar ett meddelande skickat av användaren
+    public FileController() {
+        logFile = new File("res/serverFiles/serverlog.txt");
+
+        // Kontrollera om filen redan existerar, om inte skapa den
+        if (!logFile.exists()) {
+            try {
+                logFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    // Loggar ett meddelande skickat av användaren
     public void logMessageSent(String sender, String receiver, String message) {
         System.out.println("Logging sent message for: " + sender);
         String logEntry = formatLogEntry(sender, receiver, message, "sent");
@@ -100,5 +106,3 @@ public class FileController {
         }
     }
 }
-
-

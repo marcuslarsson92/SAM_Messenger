@@ -7,6 +7,10 @@ import server.Boundary.ServerView;
 import javax.swing.*;
 import java.io.*;
 import java.net.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -23,21 +27,8 @@ public class Server {
     private ServerView view;
     private List<User> allUsers = new ArrayList<>(); // Lista över alla registrerade användare
 
-    /**
-     * Instantiates a new Server.
-     *
-     * @param port the port
-     */
-    public Server(int port) {
+    public Server(int port, ServerView view) { // Modifierad konstruktor
         this.port = port;
-    }
-
-    /**
-     * Sets view.
-     *
-     * @param view the view
-     */
-    public void setView(ServerView view) {
         this.view = view;
     }
 
@@ -64,10 +55,7 @@ public class Server {
         }
     }
 
-    /**
-     * Stop server.
-     */
-    public void stopServer() {
+    public void stop() {
         running = false;
         for (ClientHandler clientHandler : clientHandlers) {
             clientHandler.closeConnection();
@@ -140,11 +128,12 @@ public class Server {
     synchronized void sendMessage(Message message) {
         boolean delivered = false;
 
-        // Skapa en FileController för avsändaren
+        // Skapa en FileController för avsändaren och servern
         FileController senderFileController = new FileController(message.getSender());
-        String senderName = message.getSender().getName();
-        String receiverNames = message.getReceivers().stream().map(User::getName).collect(Collectors.joining(", "));
-        senderFileController.logMessageSent(senderName, receiverNames, message.getText());
+        FileController serverFileController = new FileController();
+
+        senderFileController.logMessageSent(message.getSender().getName(), message.getReceiverNames(), message.getText());
+        serverFileController.logMessageSent(message.getSender().getName(), message.getReceiverNames(),message.getText());
 
         for (User receiver : message.getReceivers()) {
             ClientHandler handler = getClientHandler(receiver);
@@ -154,15 +143,15 @@ public class Server {
 
                 // Skapa en FileController för mottagaren
                 FileController receiverFileController = new FileController(receiver);
-                receiverFileController.logMessageReceived(senderName, receiver.getName(), message.getText());
+                receiverFileController.logMessageReceived(message.getSender().getName(), receiver.getName(), message.getText());
             }
         }
 
         if (!delivered) {
             undeliveredMessages.add(message);
-            logMessage("Message from " + senderName + " to " + receiverNames + " queued");
+            logMessage("Message from " + message.getSender().getName() + " to " + message.getReceiverNames() + " queued");
         } else {
-            logMessage("Message from " + senderName + " to " + receiverNames + " delivered");
+            logMessage("Message from " + message.getSender().getName() + " to " + message.getReceiverNames() + " delivered");
         }
     }
 
@@ -206,20 +195,145 @@ public class Server {
         }
     }
 
-    /**
-     * The entry point of application.
-     *
-     * @param args the input arguments
-     */
-    public static void main(String[] args) {
-        Server server = new Server(12345);
+    // Hantera sortering av loggar
+    public void handleLogSorting(String criteria) {
+        List<String> logLines = readLogFile();
+        List<String> sortedLogLines = new ArrayList<>(logLines);
 
-        SwingUtilities.invokeLater(() -> {
-            ServerView serverView = new ServerView(server);
-            server.setView(serverView);
-            serverView.setVisible(true);
-        });
+        switch (criteria) {
+            case "Time":
+                //sortedLogLines = filterByDate(sortedLogLines, ...); // Lägg till nödvändiga parametrar
+                Collections.reverse(sortedLogLines);  // Visa senaste först
+                break;
+            case "Sender":
+                //sortedLogLines = filterBySender(sortedLogLines, ...);
+                break;
+            case "Receiver":
+                //sortedLogLines = filterByReceiver(sortedLogLines, ...);
+                break;
+        }
 
+        view.showLogs(sortedLogLines); // Visa sorterade loggar
     }
 
+    // Läs loggfil
+    private List<String> readLogFile() {
+        // Implementera filinläsning och returnera loggar
+        return Collections.emptyList(); // Placeholder
+    }
+
+    // Filtreringsmetoder
+    private List<String> filterByDate(List<String> logLines, String startDateTime, String endDateTime) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime start = startDateTime.isEmpty() ? LocalDateTime.MIN : LocalDateTime.parse(startDateTime, formatter);
+        LocalDateTime end = endDateTime.isEmpty() ? LocalDateTime.MAX : LocalDateTime.parse(endDateTime, formatter);
+
+        List<String> filtered = new ArrayList<>();
+        for (String line : logLines) {
+            String dateTimePart = line.split("\\|")[0].trim(); // Extrahera hela tidstämpeln (yyyy-MM-dd HH:mm:ss)
+            LocalDateTime logDateTime = LocalDateTime.parse(dateTimePart, formatter);
+            if (!logDateTime.isBefore(start) && !logDateTime.isAfter(end)) {
+                filtered.add(line);
+            }
+        }
+        return filtered;
+    }
+
+    private List<String> filterBySender(List<String> logLines, String sender) {
+        if (sender == null || sender.isEmpty()) return logLines;
+        List<String> filtered = new ArrayList<>();
+        for (String line : logLines) {
+            if (extractSender(line).equalsIgnoreCase(sender)) {
+                filtered.add(line);
+            }
+        }
+        return filtered;
+    }
+
+    private List<String> filterByReceiver(List<String> logLines, String receiver) {
+        if (receiver == null || receiver.isEmpty()) return logLines;
+        List<String> filtered = new ArrayList<>();
+        for (String line : logLines) {
+            if (extractReceiver(line).equalsIgnoreCase(receiver)) {
+                filtered.add(line);
+            }
+        }
+        return filtered;
+    }
+
+    private String extractSender(String logLine) {
+        return logLine.split("\\|")[1].trim().replace("From: ", "");
+    }
+
+    private String extractReceiver(String logLine) {
+        return logLine.split("\\|")[2].trim().replace("To: ", "");
+    }
+
+    public void sortLogByTime(String startDateStr, String endDateStr) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm"); // Format matchar loggfilen
+        List<String> logEntries = new ArrayList<>();
+
+        // Läs in loggfilen
+        try (BufferedReader reader = new BufferedReader(new FileReader("res/serverFiles/serverlog.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                logEntries.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Konvertera start- och slutdatum från String till Date
+        Date startDate = null;
+        Date endDate = null;
+        try {
+            startDate = sdf.parse(startDateStr);
+            endDate = sdf.parse(endDateStr);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        // Filtrera och sortera loggposter efter tid
+        List<String> filteredEntries = new ArrayList<>();
+        for (String entry : logEntries) {
+            try {
+                String timeStr = entry.substring(entry.lastIndexOf("Time: ") + 6);
+                Date logTime = sdf.parse(timeStr);
+                if ((startDate == null || logTime.after(startDate)) && (endDate == null || logTime.before(endDate))) {
+                    filteredEntries.add(entry);
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Sortera de filtrerade loggposterna
+        Collections.sort(filteredEntries, new Comparator<String>() {
+            @Override
+            public int compare(String entry1, String entry2) {
+                try {
+                    String time1 = entry1.substring(entry1.lastIndexOf("Time: ") + 6);
+                    String time2 = entry2.substring(entry2.lastIndexOf("Time: ") + 6);
+                    return sdf.parse(time1).compareTo(sdf.parse(time2));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    return 0;
+                }
+            }
+        });
+
+        // Visa de sorterade loggposterna i GUI
+        for (String entry : filteredEntries) {
+            view.logMessage(entry);
+        }
+    }
+
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            ServerView serverView = new ServerView();
+            Server server = new Server(12345, serverView); // Skapa Server och ServerView
+            serverView.setVisible(true);
+        });
+    }
 }

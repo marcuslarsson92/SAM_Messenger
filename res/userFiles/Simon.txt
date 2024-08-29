@@ -3,3 +3,7 @@ Iconpath: icons/icon3.png
 Activity Log:
 Simon received a message from Marcus. Message: "Marcus skickar första gruppmeddelandet till Alex och Simon" Time: 28/08/2024 01:22
 Simon received a message from Alex. Message: "Hej Marcus och Simon. Alex skickar 09,57." Time: 28/08/2024 09:57
+Simon received a message from Alex. Message: "Alex till Simon" Time: 28/08/2024 12:36
+Simon received a message from Alex. Message: "Hej" Time: 28/08/2024 12:51
+Simon sent a message to Alex. Message: "Simon skickar till Alex" Time: 28/08/2024 12:51
+Simon received a message from Alex. Message: "Gruppchatt från Alex till Simon Theodor 12,54" Time: 28/08/2024 12:54
