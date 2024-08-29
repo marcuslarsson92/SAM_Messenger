@@ -7,6 +7,8 @@ import server.Boundary.ServerView;
 import javax.swing.*;
 import java.io.*;
 import java.net.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -222,6 +224,66 @@ public class Server {
     private String extractReceiver(String logLine) {
         return logLine.split("\\|")[2].trim().replace("To: ", "");
     }
+
+    public void sortLogByTime(String startDateStr, String endDateStr) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm"); // Format matchar loggfilen
+        List<String> logEntries = new ArrayList<>();
+
+        // Läs in loggfilen
+        try (BufferedReader reader = new BufferedReader(new FileReader("res/serverFiles/serverlog.txt"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                logEntries.add(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // Konvertera start- och slutdatum från String till Date
+        Date startDate = null;
+        Date endDate = null;
+        try {
+            startDate = sdf.parse(startDateStr);
+            endDate = sdf.parse(endDateStr);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        // Filtrera och sortera loggposter efter tid
+        List<String> filteredEntries = new ArrayList<>();
+        for (String entry : logEntries) {
+            try {
+                String timeStr = entry.substring(entry.lastIndexOf("Time: ") + 6);
+                Date logTime = sdf.parse(timeStr);
+                if ((startDate == null || logTime.after(startDate)) && (endDate == null || logTime.before(endDate))) {
+                    filteredEntries.add(entry);
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+        // Sortera de filtrerade loggposterna
+        Collections.sort(filteredEntries, new Comparator<String>() {
+            @Override
+            public int compare(String entry1, String entry2) {
+                try {
+                    String time1 = entry1.substring(entry1.lastIndexOf("Time: ") + 6);
+                    String time2 = entry2.substring(entry2.lastIndexOf("Time: ") + 6);
+                    return sdf.parse(time1).compareTo(sdf.parse(time2));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                    return 0;
+                }
+            }
+        });
+
+        // Visa de sorterade loggposterna i GUI
+        for (String entry : filteredEntries) {
+            view.logMessage(entry);
+        }
+    }
+
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

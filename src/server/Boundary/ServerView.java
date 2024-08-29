@@ -9,7 +9,10 @@ import server.Control.Server;
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Properties;
 
@@ -106,16 +109,16 @@ public class ServerView extends JFrame {
             endDateButton.addActionListener(e -> endDateField.setText(showDateTimePicker()));
 
             JPanel panel = new JPanel();
-            panel.add(new JLabel("Start Date (yyyy-MM-dd HH:mm:ss):"));
+            panel.add(new JLabel("Start Date:"));
             panel.add(startDateField);
             panel.add(startDateButton);
-            panel.add(new JLabel("End Date (yyyy-MM-dd HH:mm:ss):"));
+            panel.add(new JLabel("End Date:"));
             panel.add(endDateField);
             panel.add(endDateButton);
 
             int result = JOptionPane.showConfirmDialog(this, panel, "Select Date Range", JOptionPane.OK_CANCEL_OPTION);
             if (result == JOptionPane.OK_OPTION) {
-                openLogViewer(criteria, startDateField.getText(), endDateField.getText(), null);
+                server.sortLogByTime(startDateField.getText(), endDateField.getText());
             }
 
     }
@@ -172,5 +175,25 @@ public class ServerView extends JFrame {
 
         logFrame.add(new JScrollPane(logArea), BorderLayout.CENTER);
         logFrame.setVisible(true);
+    }
+
+    public class DateLabelFormatter extends JFormattedTextField.AbstractFormatter {
+
+        private String datePattern = "yyyy-MM-dd";
+        private SimpleDateFormat dateFormatter = new SimpleDateFormat(datePattern);
+
+        @Override
+        public Object stringToValue(String text) throws ParseException {
+            return dateFormatter.parseObject(text);
+        }
+
+        @Override
+        public String valueToString(Object value) throws ParseException {
+            if (value != null) {
+                Calendar cal = (Calendar) value;
+                return dateFormatter.format(cal.getTime());
+            }
+            return "";
+        }
     }
 }
