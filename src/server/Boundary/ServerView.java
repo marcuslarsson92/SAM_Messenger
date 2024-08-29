@@ -1,6 +1,9 @@
 package server.Boundary;
 
 
+import org.jdatepicker.impl.JDatePanelImpl;
+import org.jdatepicker.impl.JDatePickerImpl;
+import org.jdatepicker.impl.UtilDateModel;
 import server.Control.Server;
 
 import javax.swing.*;
@@ -8,6 +11,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Properties;
 
 public class ServerView extends JFrame {
     private JTextArea logArea;
@@ -78,9 +82,83 @@ public class ServerView extends JFrame {
                 JOptionPane.PLAIN_MESSAGE, null, options, options[0]);
 
         if (criteria != null) {
-            server.handleLogSorting(criteria); // Flytta logik för att hantera sortering till Server
+            switch (criteria) {
+                case "All":
+                case "Sender":
+                case "Receiver":
+                    JOptionPane.showMessageDialog(this, "At the moment you can only filter by time");
+                    break;
+                case "Time":
+                    openTimeFilterDialog();
+                    break;
+            }
         }
     }
+
+    private void openTimeFilterDialog() {
+            JTextField startDateField = new JTextField(10);
+            JTextField endDateField = new JTextField(10);
+
+            JButton startDateButton = new JButton("Choose Start Date");
+            startDateButton.addActionListener(e -> startDateField.setText(showDateTimePicker()));
+
+            JButton endDateButton = new JButton("Choose End Date");
+            endDateButton.addActionListener(e -> endDateField.setText(showDateTimePicker()));
+
+            JPanel panel = new JPanel();
+            panel.add(new JLabel("Start Date (yyyy-MM-dd HH:mm:ss):"));
+            panel.add(startDateField);
+            panel.add(startDateButton);
+            panel.add(new JLabel("End Date (yyyy-MM-dd HH:mm:ss):"));
+            panel.add(endDateField);
+            panel.add(endDateButton);
+
+            int result = JOptionPane.showConfirmDialog(this, panel, "Select Date Range", JOptionPane.OK_CANCEL_OPTION);
+            if (result == JOptionPane.OK_OPTION) {
+                openLogViewer(criteria, startDateField.getText(), endDateField.getText(), null);
+            }
+
+    }
+
+    private String showDateTimePicker() {
+        UtilDateModel model = new UtilDateModel();
+        Properties p = new Properties();
+        p.put("text.today", "Today");
+        p.put("text.month", "Month");
+        p.put("text.year", "Year");
+
+        JDatePanelImpl datePanel = new JDatePanelImpl(model, p);
+        JDatePickerImpl datePicker = new JDatePickerImpl(datePanel, new DateLabelFormatter());
+
+        JComboBox<String> hourComboBox = new JComboBox<>();
+        JComboBox<String> minuteComboBox = new JComboBox<>();
+        for (int i = 0; i < 24; i++) {
+            hourComboBox.addItem(String.format("%02d", i));
+        }
+        for (int i = 0; i < 60; i++) {
+            minuteComboBox.addItem(String.format("%02d", i));
+        }
+
+        JPanel timePanel = new JPanel();
+        timePanel.add(new JLabel("Hour:"));
+        timePanel.add(hourComboBox);
+        timePanel.add(new JLabel("Minute:"));
+        timePanel.add(minuteComboBox);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.add(datePicker, BorderLayout.CENTER);
+        panel.add(timePanel, BorderLayout.SOUTH);
+
+        int result = JOptionPane.showConfirmDialog(null, panel, "Select Date and Time", JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            String selectedDate = datePicker.getJFormattedTextField().getText();
+            String selectedHour = (String) hourComboBox.getSelectedItem();
+            String selectedMinute = (String) minuteComboBox.getSelectedItem();
+            return selectedDate + " " + selectedHour + ":" + selectedMinute + ":00";
+        }
+        return "";
+    }
+
 
     // Metod för att visa loggar efter att de sorterats i Server-klassen
     public void showLogs(List<String> logLines) {
