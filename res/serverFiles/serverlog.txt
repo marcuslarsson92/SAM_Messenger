@@ -1,0 +1,3 @@
+Alex sent a message to Simon. Message: "Hej" Time: 28/08/2024 12:51
+Simon sent a message to Alex. Message: "Simon skickar till Alex" Time: 28/08/2024 12:51
+Alex sent a message to Simon, Theodor. Message: "Gruppchatt från Alex till Simon Theodor 12,54" Time: 28/08/2024 12:54

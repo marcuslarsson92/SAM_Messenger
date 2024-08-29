@@ -1,0 +1,2 @@
+Alex sent a message to Marcus. Message: "ALEX SKICKAR till marcus 12,35" Time: 28/08/2024 12:35
+Alex sent a message to Simon. Message: "Alex till Simon" Time: 28/08/2024 12:36

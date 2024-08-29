@@ -28,6 +28,19 @@ public class FileController {
         }
     }
 
+    public FileController() {
+        logFile = new File("res/serverFiles/serverlog.txt");
+
+        // Kontrollera om filen redan existerar, om inte skapa den
+        if (!logFile.exists()) {
+            try {
+                logFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     // Loggar ett meddelande skickat av användaren
     public void logMessageSent(String sender, String receiver, String message) {
         System.out.println("Logging sent message for: " + sender);

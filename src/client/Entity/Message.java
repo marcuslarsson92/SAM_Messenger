@@ -31,6 +31,18 @@ public class Message implements Serializable {
         return receivers;
     }
 
+    public String getReceiverNames() {
+        StringBuilder names = new StringBuilder();
+        for (User user : receivers) {
+            if (names.length() > 0) {
+                names.append(", ");
+            }
+            names.append(user.getName());
+        }
+        return names.toString();
+    }
+
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
