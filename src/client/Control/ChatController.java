@@ -5,7 +5,6 @@ import client.Boundary.ChatWindow;
 import client.Entity.Message;
 import client.Entity.User;
 
-import javax.sound.sampled.*;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -41,7 +40,6 @@ public class ChatController {
         this.chatWindows = new HashMap<>();
         this.contacts = new HashSet<>();
 
-
         this.chatView.setChatController(this);
 
         client.setMessageListener(this::handleIncomingMessage);
@@ -59,12 +57,25 @@ public class ChatController {
     public void handleUserSelection(Object selectedValue) {
         if (selectedValue instanceof User) {
             User selectedUser = (User) selectedValue;
-            if (newMessageUsers.contains(selectedUser)) {
-                newMessageUsers.removeElement(selectedUser);
-                chatView.repaintUserList();
-            }
             openChatWindow(selectedUser.getName());
         }
+    }
+
+    /**
+     * Open chat window.
+     *
+     * @param username the username
+     */
+    public void openChatWindow(String username) {
+        User user = getUserByName(username);
+        if (user == null) {
+            user = new User(username, null);  // Skapa en ny användare om det behövs
+        }
+
+        User finalUser = user;
+        ChatWindow chatWindow = chatWindows.computeIfAbsent(username, k -> new ChatWindow(this, client, finalUser));
+
+        chatWindow.setVisible(true);
     }
 
     /**
@@ -79,26 +90,6 @@ public class ChatController {
             }
         }
         return null;
-    }
-
-    /**
-     * Loads all users in the system through their log file
-     *
-     * @return usernames list of all users in the system
-     */
-
-    private List<String> loadAllUsernames() {
-        File folder = new File("res/userFiles");
-        File[] listOfFiles = folder.listFiles((dir, name) -> name.endsWith(".txt"));
-
-        List<String> usernames = new ArrayList<>();
-        if (listOfFiles != null) {
-            for (File file : listOfFiles) {
-                String username = file.getName().replace(".txt", "");
-                usernames.add(username);
-            }
-        }
-        return usernames;
     }
 
     /**
@@ -131,76 +122,79 @@ public class ChatController {
                     }
                 }
                 if (!isOnline) {
-                    chatView.addUserListElement(username);
+                    User offlineUser = new User(username, null);
+                    chatView.addUserListElement(offlineUser);
                 }
             }
         });
     }
 
     /**
-     * Open chat window.
+     * Handle send message.
      *
-     * @param username the username
-     * @return the chat window
+     * @param chatWindow the chat window
+     * @param text       the text
      */
-    public ChatWindow openChatWindow(String username) {
-        User user = getUserByName(username);
-        if (user != null) {
-            return chatWindows.computeIfAbsent(username, k -> {
-                ChatWindow chatWindow = new ChatWindow(this, client, user);
-
-                Point mainWindowLocation = chatView.getLocation();
-                int mainWindowWidth = chatView.getWidth();
-                int mainWindowHeight = chatView.getHeight();
-
-                int chatWindowWidth = chatWindow.getWidth();
-                int chatWindowHeight = chatWindow.getHeight();
-
-                int chatWindowX = mainWindowLocation.x + (mainWindowWidth - chatWindowWidth) / 2;
-                int chatWindowY = mainWindowLocation.y + (mainWindowHeight - chatWindowHeight) / 2;
-
-                chatWindow.setLocation(chatWindowX, chatWindowY);
-
-                chatWindow.setVisible(true);
-                return chatWindow;
-            });
+    public void handleSendMessage(ChatWindow chatWindow, String text) {
+        if (!text.isEmpty()) {
+            Message message = new Message(client.getUser(), chatWindow.getReceivers(), text, null);
+            try {
+                client.sendMessage(message);
+                chatWindow.displayMessage(message);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        return null;
     }
-
-    /**
-     * Message listener calls this and handles incoming messages to client
-     *
-     * @param message the message
-     */
     private void handleIncomingMessage(Message message) {
         String senderName = message.getSender().getName();
-        ChatWindow chatWindow = openChatWindow(senderName);
-        if (chatWindow != null) {
-            chatWindow.receiveMessage(message);
+
+        // Kontrollera om det redan finns ett chattfönster för avsändaren
+        ChatWindow chatWindow = chatWindows.get(senderName);
+
+        if (chatWindow == null) {
+            // Om inget chattfönster finns, skapa ett nytt
+            User sender = getUserByName(senderName);
+            if (sender == null) {
+                sender = new User(senderName, null);  // Om användaren inte är känd, skapa en ny User
+            }
+            chatWindow = new ChatWindow(this, client, sender);
+            chatWindows.put(senderName, chatWindow);
         }
 
-        User sender = getUserByName(senderName);
-        if (sender != null && !newMessageUsers.contains(sender)) {
-            newMessageUsers.addElement(sender);
-            chatView.repaintUserList();
+        // Visa meddelandet i chattfönstret
+        chatWindow.receiveMessage(message);
+
+        // Om fönstret inte är synligt, gör det synligt
+        if (!chatWindow.isVisible()) {
+            chatWindow.setVisible(true);
         }
-        playNotificationSound();
+
+        // Om användaren som skickade meddelandet inte redan är i listan över nya meddelandeanvändare, lägg till dem
+        if (!newMessageUsers.contains(senderName)) {
+            newMessageUsers.addElement(senderName);
+            chatView.repaintUserList();  // Uppdatera användarlistan
+        }
     }
 
     /**
-     * Plays notification sound
+     * Loads all users in the system through their log file
+     *
+     * @return usernames list of all users in the system
      */
-    private void playNotificationSound() {
-        try {
-            File soundFile = new File("res/sound/notification.wav");
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
-            Clip clip = AudioSystem.getClip();
-            clip.open(audioStream);
-            clip.start();
-        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-            e.printStackTrace();
+
+    private List<String> loadAllUsernames() {
+        File folder = new File("res/userFiles");
+        File[] listOfFiles = folder.listFiles((dir, name) -> name.endsWith(".txt"));
+
+        List<String> usernames = new ArrayList<>();
+        if (listOfFiles != null) {
+            for (File file : listOfFiles) {
+                String username = file.getName().replace(".txt", "");
+                usernames.add(username);
+            }
         }
+        return usernames;
     }
 
     /**
@@ -224,9 +218,9 @@ public class ChatController {
     /**
      * Sets view.
      *
-     * @param chatvView the chatv view
+     * @param chatView the chat view
      */
-    public void setView(ChatView chatvView) {
+    public void setView(ChatView chatView) {
         this.chatView = chatView;
     }
 
@@ -256,24 +250,6 @@ public class ChatController {
     }
 
     /**
-     * Handle send message.
-     *
-     * @param chatWindow the chat window
-     * @param text       the text
-     */
-    public void handleSendMessage(ChatWindow chatWindow, String text) {
-        if (!text.isEmpty()) {
-            Message message = new Message(client.getUser(), chatWindow.getReceivers(), text, null);
-            try {
-                client.sendMessage(message);
-                chatWindow.displayMessage(message);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    /**
      * Attach image.
      *
      * @param chatWindow the chat window
@@ -291,5 +267,4 @@ public class ChatController {
             }
         }
     }
-
 }
