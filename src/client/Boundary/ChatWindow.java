@@ -52,7 +52,7 @@ public class ChatWindow extends JFrame {
         setTitle(receivers.size() == 1 ? "Chat with " + receivers.get(0).getName() : "Group chat with " + getReceiverNames());
         setSize(400, 400);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
+        setLocationRelativeTo(controller.getChatView());
 
         chatPane = new JTextPane();
         chatPane.setEditable(false);
@@ -196,6 +196,7 @@ public class ChatWindow extends JFrame {
      */
     public void receiveMessage(Message message) {
         displayMessage(message);
+
     }
 
     /**
