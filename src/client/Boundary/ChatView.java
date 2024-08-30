@@ -110,6 +110,7 @@ public class ChatView extends JFrame {
     public void setChatController(ChatController chatController) {
         this.chatController = chatController;
     }
+
     /**
      * Custom renderer for cells in the user list, enhancing the display with user icons,
      * names, and a checkbox for selecting contacts. Adjusts appearance based on selection
@@ -126,6 +127,7 @@ public class ChatView extends JFrame {
         public UserListCellRenderer(ChatController chatController) {
             this.chatController = chatController;
         }
+
         /**
          * Customizes the appearance and behavior of a list cell in the user list.
          *
@@ -141,7 +143,6 @@ public class ChatView extends JFrame {
             JPanel panel = new JPanel(new BorderLayout());
             JLabel label = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
-            // Hantera bakgrundsfärg
             if (isSelected) {
                 panel.setBackground(list.getSelectionBackground());
                 label.setBackground(list.getSelectionBackground());
@@ -155,7 +156,6 @@ public class ChatView extends JFrame {
             if (value instanceof User) {
                 User user = (User) value;
 
-                // Skala om ikonen till en mindre storlek
                 ImageIcon icon = user.getIcon();
                 if (icon != null) {
                     Image scaledImage = icon.getImage().getScaledInstance(30, 30, Image.SCALE_SMOOTH);
@@ -166,20 +166,7 @@ public class ChatView extends JFrame {
                 label.setText(user.getName());
                 label.setHorizontalTextPosition(JLabel.RIGHT);
 
-                // Lägg till en checkbox
-                JCheckBox contactCheckBox = new JCheckBox();
-                contactCheckBox.setSelected(chatController.getContacts().contains(user));
-                contactCheckBox.addActionListener(e -> {
-                    if (contactCheckBox.isSelected()) {
-                        chatController.getContacts().add(user);
-                    } else {
-                        chatController.getContacts().remove(user);
-                    }
-                    chatController.updateUserList();
-                });
-
                 panel.add(label, BorderLayout.WEST);
-                panel.add(contactCheckBox, BorderLayout.EAST);
                 panel.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
 
                 return panel;
@@ -187,12 +174,10 @@ public class ChatView extends JFrame {
             } else if (value instanceof String) {
                 String stringValue = (String) value;
                 label.setText(stringValue);
-                if (stringValue.equals("Online:") || stringValue.equals("Offline:")) {
-                    label.setFont(label.getFont().deriveFont(Font.BOLD));
-                    label.setHorizontalAlignment(JLabel.LEFT);
-                    panel.add(label, BorderLayout.WEST);
-                    return panel;
-                }
+                label.setFont(label.getFont().deriveFont(Font.BOLD));
+                label.setHorizontalAlignment(JLabel.LEFT);
+                panel.add(label, BorderLayout.WEST);
+                return panel;
             }
 
             panel.add(label, BorderLayout.WEST);

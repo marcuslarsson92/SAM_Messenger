@@ -41,7 +41,6 @@ public class ChatController {
         this.chatWindows = new HashMap<>();
         this.contacts = new HashSet<>();
 
-
         this.chatView.setChatController(this);
 
         client.setMessageListener(this::handleIncomingMessage);
@@ -59,13 +58,30 @@ public class ChatController {
     public void handleUserSelection(Object selectedValue) {
         if (selectedValue instanceof User) {
             User selectedUser = (User) selectedValue;
-            if (newMessageUsers.contains(selectedUser)) {
-                newMessageUsers.removeElement(selectedUser);
-                chatView.repaintUserList();
-            }
             openChatWindow(selectedUser.getName());
         }
     }
+
+    /**
+     * Open chat window.
+     *
+     * @param username the username
+     * @return
+     */
+
+    public ChatWindow openChatWindow(String username) {
+        User user = getUserByName(username);
+        if (user == null) {
+            user = new User(username, null);  // Skapa en ny användare om det behövs
+        }
+
+        User finalUser = user;
+        ChatWindow chatWindow = chatWindows.computeIfAbsent(username, k -> new ChatWindow(this, client, finalUser));
+
+        chatWindow.setVisible(true);
+        return chatWindow;
+    }
+
 
     /**
      * Get user from given username
@@ -79,26 +95,6 @@ public class ChatController {
             }
         }
         return null;
-    }
-
-    /**
-     * Loads all users in the system through their log file
-     *
-     * @return usernames list of all users in the system
-     */
-
-    private List<String> loadAllUsernames() {
-        File folder = new File("res/userFiles");
-        File[] listOfFiles = folder.listFiles((dir, name) -> name.endsWith(".txt"));
-
-        List<String> usernames = new ArrayList<>();
-        if (listOfFiles != null) {
-            for (File file : listOfFiles) {
-                String username = file.getName().replace(".txt", "");
-                usernames.add(username);
-            }
-        }
-        return usernames;
     }
 
     /**
@@ -131,76 +127,49 @@ public class ChatController {
                     }
                 }
                 if (!isOnline) {
-                    chatView.addUserListElement(username);
+                    User offlineUser = new User(username, null);
+                    chatView.addUserListElement(offlineUser);
                 }
             }
         });
     }
 
     /**
-     * Open chat window.
+     * Handle send message.
      *
-     * @param username the username
-     * @return the chat window
+     * @param chatWindow the chat window
+     * @param text       the text
      */
-    public ChatWindow openChatWindow(String username) {
-        User user = getUserByName(username);
-        if (user != null) {
-            return chatWindows.computeIfAbsent(username, k -> {
-                ChatWindow chatWindow = new ChatWindow(this, client, user);
-
-                Point mainWindowLocation = chatView.getLocation();
-                int mainWindowWidth = chatView.getWidth();
-                int mainWindowHeight = chatView.getHeight();
-
-                int chatWindowWidth = chatWindow.getWidth();
-                int chatWindowHeight = chatWindow.getHeight();
-
-                int chatWindowX = mainWindowLocation.x + (mainWindowWidth - chatWindowWidth) / 2;
-                int chatWindowY = mainWindowLocation.y + (mainWindowHeight - chatWindowHeight) / 2;
-
-                chatWindow.setLocation(chatWindowX, chatWindowY);
-
-                chatWindow.setVisible(true);
-                return chatWindow;
-            });
+    public void handleSendMessage(ChatWindow chatWindow, String text) {
+        if (!text.isEmpty()) {
+            Message message = new Message(client.getUser(), chatWindow.getReceivers(), text, null);
+            try {
+                client.sendMessage(message);
+                chatWindow.displayMessage(message);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        return null;
     }
 
     /**
-     * Message listener calls this and handles incoming messages to client
+     * Loads all users in the system through their log file
      *
-     * @param message the message
+     * @return usernames list of all users in the system
      */
-    private void handleIncomingMessage(Message message) {
-        String senderName = message.getSender().getName();
-        ChatWindow chatWindow = openChatWindow(senderName);
-        if (chatWindow != null) {
-            chatWindow.receiveMessage(message);
-        }
 
-        User sender = getUserByName(senderName);
-        if (sender != null && !newMessageUsers.contains(sender)) {
-            newMessageUsers.addElement(sender);
-            chatView.repaintUserList();
-        }
-        playNotificationSound();
-    }
+    private List<String> loadAllUsernames() {
+        File folder = new File("res/userFiles");
+        File[] listOfFiles = folder.listFiles((dir, name) -> name.endsWith(".txt"));
 
-    /**
-     * Plays notification sound
-     */
-    private void playNotificationSound() {
-        try {
-            File soundFile = new File("res/sound/notification.wav");
-            AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
-            Clip clip = AudioSystem.getClip();
-            clip.open(audioStream);
-            clip.start();
-        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
-            e.printStackTrace();
+        List<String> usernames = new ArrayList<>();
+        if (listOfFiles != null) {
+            for (File file : listOfFiles) {
+                String username = file.getName().replace(".txt", "");
+                usernames.add(username);
+            }
         }
+        return usernames;
     }
 
     /**
@@ -224,9 +193,9 @@ public class ChatController {
     /**
      * Sets view.
      *
-     * @param chatvView the chatv view
+     * @param chatView the chat view
      */
-    public void setView(ChatView chatvView) {
+    public void setView(ChatView chatView) {
         this.chatView = chatView;
     }
 
@@ -254,24 +223,59 @@ public class ChatController {
         ChatWindow groupChatWindow = new ChatWindow(this, client, onlineUsers);
         groupChatWindow.setVisible(true);
     }
+    private void handleIncomingMessage(Message message) {
+        String senderName = message.getSender().getName();
 
-    /**
-     * Handle send message.
-     *
-     * @param chatWindow the chat window
-     * @param text       the text
-     */
-    public void handleSendMessage(ChatWindow chatWindow, String text) {
-        if (!text.isEmpty()) {
-            Message message = new Message(client.getUser(), chatWindow.getReceivers(), text, null);
-            try {
-                client.sendMessage(message);
-                chatWindow.displayMessage(message);
-            } catch (IOException e) {
-                e.printStackTrace();
+        // Kontrollera om det redan finns ett chattfönster för avsändaren
+        ChatWindow chatWindow = chatWindows.get(senderName);
+
+        if (chatWindow == null) {
+            // Om inget chattfönster finns, skapa ett nytt
+            User sender = getUserByName(senderName);
+            if (sender == null) {
+                sender = new User(senderName, null);  // Om användaren inte är känd, skapa en ny User
             }
+            chatWindow = new ChatWindow(this, client, sender);
+            chatWindows.put(senderName, chatWindow);
+
+            // Centrera fönstret på skärmen
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            int x = (screenSize.width - chatWindow.getWidth()) / 2;
+            int y = (screenSize.height - chatWindow.getHeight()) / 2;
+            chatWindow.setLocation(x, y);
+
+            // Gör fönstret synligt
+            chatWindow.setVisible(true);
+        }
+
+        // Visa meddelandet i chattfönstret
+        chatWindow.receiveMessage(message);
+
+        // Fokusera fönstret om det inte redan är det
+        if (!chatWindow.isFocused()) {
+            chatWindow.toFront();
+            chatWindow.requestFocus();
+        }
+
+        // Om användaren som skickade meddelandet inte redan är i listan över nya meddelandeanvändare, lägg till dem
+        if (!newMessageUsers.contains(senderName)) {
+            newMessageUsers.addElement(senderName);
+            chatView.repaintUserList();  // Uppdatera användarlistan
         }
     }
+
+    private void playNotificationSound() {
+        try {
+            File soundFile = new File("res/sound/notification.wav");
+            AudioInputStream audioStream = AudioSystem.getAudioInputStream(soundFile);
+            Clip clip = AudioSystem.getClip();
+            clip.open(audioStream);
+            clip.start();
+        } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     /**
      * Attach image.
@@ -291,5 +295,4 @@ public class ChatController {
             }
         }
     }
-
 }

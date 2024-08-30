@@ -38,7 +38,12 @@ public class User implements Serializable {
      * @return the icon
      */
     public ImageIcon getIcon() {
-        return (ImageIcon) createIcon(icon);
+        if (icon == null || icon.isEmpty()) {
+            // Använd en standardikon om ingen ikon är angiven
+            return createDefaultIcon();
+        } else {
+            return (ImageIcon) createIcon(icon);
+        }
     }
 
     /**
@@ -65,10 +70,20 @@ public class User implements Serializable {
             return new ImageIcon(imgURL);
         } else {
             System.err.println("Error loading image: " + path);
-            return null;
+            return createDefaultIcon(); // Återgå till standardikon vid fel
         }
     }
 
+    private ImageIcon createDefaultIcon() {
+        // Skapa eller returnera en standardikon
+        java.net.URL imgURL = getClass().getClassLoader().getResource("icons/default.png");
+        if (imgURL != null) {
+            return new ImageIcon(imgURL);
+        } else {
+            System.err.println("Default icon not found!");
+            return null; // Hantera detta fall på lämpligt sätt
+        }
+    }
 
     @Override
     public boolean equals(Object obj) {
@@ -82,6 +97,4 @@ public class User implements Serializable {
     public int hashCode() {
         return name.hashCode();
     }
-
-
 }

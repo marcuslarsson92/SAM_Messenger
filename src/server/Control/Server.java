@@ -22,7 +22,7 @@ public class Server {
     private final int port;
     private Set<ClientHandler> clientHandlers = ConcurrentHashMap.newKeySet();
     private Map<String, User> connectedUsers = new ConcurrentHashMap<>();
-    private Queue<Message> undeliveredMessages = new ConcurrentLinkedQueue<>();
+    private Map<String, List<Message>> offlineMessages = new ConcurrentHashMap<>(); // Map för att hålla offline-meddelanden
     private boolean running = true;
     private ServerView view;
     private List<User> allUsers = new ArrayList<>(); // Lista över alla registrerade användare
@@ -96,8 +96,11 @@ public class Server {
         }
         connectedUsers.put(user.getName(), user);
         logMessage("User connected: " + user.getName());
-        broadcastUserUpdate();
 
+        // Leverera sparade meddelanden om det finns några
+        deliverUndeliveredMessages(user);
+
+        broadcastUserUpdate();
     }
 
     /**
@@ -133,7 +136,7 @@ public class Server {
         FileController serverFileController = new FileController();
 
         senderFileController.logMessageSent(message.getSender().getName(), message.getReceiverNames(), message.getText());
-        serverFileController.logMessageSent(message.getSender().getName(), message.getReceiverNames(),message.getText());
+        serverFileController.logMessageSent(message.getSender().getName(), message.getReceiverNames(), message.getText());
 
         for (User receiver : message.getReceivers()) {
             ClientHandler handler = getClientHandler(receiver);
@@ -144,11 +147,13 @@ public class Server {
                 // Skapa en FileController för mottagaren
                 FileController receiverFileController = new FileController(receiver);
                 receiverFileController.logMessageReceived(message.getSender().getName(), receiver.getName(), message.getText());
+            } else {
+                // Användaren är offline, spara meddelandet
+                offlineMessages.computeIfAbsent(receiver.getName(), k -> new ArrayList<>()).add(message);
             }
         }
 
         if (!delivered) {
-            undeliveredMessages.add(message);
             logMessage("Message from " + message.getSender().getName() + " to " + message.getReceiverNames() + " queued");
         } else {
             logMessage("Message from " + message.getSender().getName() + " to " + message.getReceiverNames() + " delivered");
@@ -157,6 +162,7 @@ public class Server {
 
     /**
      * Get clientHandler
+     *
      * @param user the user
      * @return ClientHandler
      */
@@ -174,15 +180,13 @@ public class Server {
      *
      * @param user the user
      */
-    public void deliverUndeliveredMessages(User user) {
-        Iterator<Message> iterator = undeliveredMessages.iterator();
-        while (iterator.hasNext()) {
-            Message message = iterator.next();
-            if (message.getReceivers().contains(user)) {
+    public synchronized void deliverUndeliveredMessages(User user) {
+        List<Message> messages = offlineMessages.remove(user.getName());
+        if (messages != null) {
+            for (Message message : messages) {
                 ClientHandler handler = getClientHandler(user);
                 if (handler != null) {
                     handler.sendMessage(message);
-                    iterator.remove();
 
                     // Logga att meddelandet levererades till användaren
                     FileController fileController = new FileController(user);
@@ -202,14 +206,13 @@ public class Server {
 
         switch (criteria) {
             case "Time":
-                //sortedLogLines = filterByDate(sortedLogLines, ...); // Lägg till nödvändiga parametrar
                 Collections.reverse(sortedLogLines);  // Visa senaste först
                 break;
             case "Sender":
-                //sortedLogLines = filterBySender(sortedLogLines, ...);
+                // Implementera sortering efter avsändare
                 break;
             case "Receiver":
-                //sortedLogLines = filterByReceiver(sortedLogLines, ...);
+                // Implementera sortering efter mottagare
                 break;
         }
 
@@ -220,53 +223,6 @@ public class Server {
     private List<String> readLogFile() {
         // Implementera filinläsning och returnera loggar
         return Collections.emptyList(); // Placeholder
-    }
-
-    // Filtreringsmetoder
-    private List<String> filterByDate(List<String> logLines, String startDateTime, String endDateTime) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTime start = startDateTime.isEmpty() ? LocalDateTime.MIN : LocalDateTime.parse(startDateTime, formatter);
-        LocalDateTime end = endDateTime.isEmpty() ? LocalDateTime.MAX : LocalDateTime.parse(endDateTime, formatter);
-
-        List<String> filtered = new ArrayList<>();
-        for (String line : logLines) {
-            String dateTimePart = line.split("\\|")[0].trim(); // Extrahera hela tidstämpeln (yyyy-MM-dd HH:mm:ss)
-            LocalDateTime logDateTime = LocalDateTime.parse(dateTimePart, formatter);
-            if (!logDateTime.isBefore(start) && !logDateTime.isAfter(end)) {
-                filtered.add(line);
-            }
-        }
-        return filtered;
-    }
-
-    private List<String> filterBySender(List<String> logLines, String sender) {
-        if (sender == null || sender.isEmpty()) return logLines;
-        List<String> filtered = new ArrayList<>();
-        for (String line : logLines) {
-            if (extractSender(line).equalsIgnoreCase(sender)) {
-                filtered.add(line);
-            }
-        }
-        return filtered;
-    }
-
-    private List<String> filterByReceiver(List<String> logLines, String receiver) {
-        if (receiver == null || receiver.isEmpty()) return logLines;
-        List<String> filtered = new ArrayList<>();
-        for (String line : logLines) {
-            if (extractReceiver(line).equalsIgnoreCase(receiver)) {
-                filtered.add(line);
-            }
-        }
-        return filtered;
-    }
-
-    private String extractSender(String logLine) {
-        return logLine.split("\\|")[1].trim().replace("From: ", "");
-    }
-
-    private String extractReceiver(String logLine) {
-        return logLine.split("\\|")[2].trim().replace("To: ", "");
     }
 
     public void sortLogByTime(String startDateStr, String endDateStr) {
@@ -308,17 +264,14 @@ public class Server {
         }
 
         // Sortera de filtrerade loggposterna
-        Collections.sort(filteredEntries, new Comparator<String>() {
-            @Override
-            public int compare(String entry1, String entry2) {
-                try {
-                    String time1 = entry1.substring(entry1.lastIndexOf("Time: ") + 6);
-                    String time2 = entry2.substring(entry2.lastIndexOf("Time: ") + 6);
-                    return sdf.parse(time1).compareTo(sdf.parse(time2));
-                } catch (ParseException e) {
-                    e.printStackTrace();
-                    return 0;
-                }
+        Collections.sort(filteredEntries, (entry1, entry2) -> {
+            try {
+                String time1 = entry1.substring(entry1.lastIndexOf("Time: ") + 6);
+                String time2 = entry2.substring(entry2.lastIndexOf("Time: ") + 6);
+                return sdf.parse(time1).compareTo(sdf.parse(time2));
+            } catch (ParseException e) {
+                e.printStackTrace();
+                return 0;
             }
         });
 
@@ -327,7 +280,6 @@ public class Server {
             view.logMessage(entry);
         }
     }
-
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

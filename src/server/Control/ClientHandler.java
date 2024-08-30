@@ -7,9 +7,6 @@ import java.io.*;
 import java.net.Socket;
 import java.util.List;
 
-/**
- * The type Client handler.
- */
 public class ClientHandler implements Runnable {
     private Socket socket;
     private Server server;
@@ -17,48 +14,46 @@ public class ClientHandler implements Runnable {
     private ObjectOutputStream out;
     private User user;
 
-    /**
-     * Instantiates a new Client handler.
-     *
-     * @param socket the socket
-     * @param server the server
-     */
     public ClientHandler(Socket socket, Server server) {
         this.socket = socket;
         this.server = server;
     }
-    /**
-     * Handles the client communication in a separate thread.
-     * This method initializes input and output streams, receives the user object, and processes incoming messages.
-     * Messages are sent to the server for delivery, and undelivered messages are handled when the user connects.
-     */
+
     @Override
     public void run() {
         try {
+            // Initialisera strömmar
             out = new ObjectOutputStream(socket.getOutputStream());
             in = new ObjectInputStream(socket.getInputStream());
 
+            // Läs in användaren
             user = (User) in.readObject();
             server.addUser(user);
+
+            // Leverera eventuella tidigare ej levererade meddelanden
             server.deliverUndeliveredMessages(user);
 
             Object obj;
             while ((obj = in.readObject()) != null) {
                 if (obj instanceof Message) {
                     Message message = (Message) obj;
-                    message.setDeliveredTime(null); // Reset delivered time for new delivery
+                    message.setDeliveredTime(null); // Nollställ leveranstiden för ny leverans
                     server.sendMessage(message);
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
+        } finally {
+            // När klienten kopplar från, ta bort användaren från servern och stäng anslutningen
+            server.removeUser(user);
+            closeConnection();
         }
     }
 
     /**
-     * Send user list.
+     * Skickar listan över användare till klienten.
      *
-     * @param userList the user list
+     * @param userList Listan över användare som ska skickas.
      */
     public void sendUserList(List<User> userList) {
         try {
@@ -69,12 +64,13 @@ public class ClientHandler implements Runnable {
     }
 
     /**
-     * Send message.
+     * Skickar ett meddelande till klienten.
      *
-     * @param message the message
+     * @param message Meddelandet som ska skickas.
      */
     public void sendMessage(Message message) {
         try {
+            // Sätt leveranstid till nuvarande tid
             message.setDeliveredTime(java.time.LocalDateTime.now());
             out.writeObject(message);
         } catch (IOException e) {
@@ -83,16 +79,16 @@ public class ClientHandler implements Runnable {
     }
 
     /**
-     * Gets user.
+     * Hämtar användaren som är associerad med denna ClientHandler.
      *
-     * @return the user
+     * @return Användarobjektet.
      */
     public User getUser() {
         return user;
     }
 
     /**
-     * Close connection.
+     * Stänger anslutningen till klienten.
      */
     void closeConnection() {
         try {
