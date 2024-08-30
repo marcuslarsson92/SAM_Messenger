@@ -1,3 +1,2 @@
-Username: Johan
-Iconpath: icons/icon4.png
-Activity Log:
+Johan sent a message to Theodor. Message: "Hej" Time: 30/08/2024 04:09
+Johan received a message from Theodor. Message: "Hej" Time: 30/08/2024 04:09

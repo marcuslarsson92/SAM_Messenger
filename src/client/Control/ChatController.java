@@ -31,23 +31,19 @@ public class ChatController {
      * Instantiates a new Chat controller.
      *
      * @param client   the client
-     * @param chatView the chat view
      */
-    public ChatController(Client client, ChatView chatView) {
+    public ChatController(Client client) {
         this.client = client;
-        this.chatView = chatView;
         this.users = new ArrayList<>();
         this.newMessageUsers = new DefaultListModel<>();
         this.chatWindows = new HashMap<>();
         this.contacts = new HashSet<>();
-
-        this.chatView.setChatController(this);
-
         client.setMessageListener(this::handleIncomingMessage);
         client.setUserListListener(updatedUsers -> {
             users = updatedUsers;
             updateUserList();
         });
+
     }
 
     /**
@@ -107,9 +103,9 @@ public class ChatController {
             // Lägg till sektion för online användare
             chatView.addUserListElement("Online:");
             for (User user : users) {
-                if (!user.getName().equals(client.getUser().getName())) {
+               if (!user.getName().equals(client.getUser().getName())) {
                     chatView.addUserListElement(user);
-                }
+               }
             }
 
             // Lägg till ett tomt utrymme för separation

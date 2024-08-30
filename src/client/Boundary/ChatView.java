@@ -20,7 +20,8 @@ public class ChatView extends JFrame {
     /**
      * Instantiates a new Chat view.
      */
-    public ChatView() {
+    public ChatView(ChatController chatController) {
+        this.chatController = chatController;
         SwingUtilities.invokeLater(() -> {
             initComponents();
             chatController.updateUserList(); // Uppdatera listan efter att komponenterna är initialiserade
@@ -91,24 +92,6 @@ public class ChatView extends JFrame {
      */
     public void repaintUserList() {
         SwingUtilities.invokeLater(() -> userList.repaint());
-    }
-
-    /**
-     * Gets chat controller.
-     *
-     * @return the chat controller
-     */
-    public ChatController getChatController() {
-        return chatController;
-    }
-
-    /**
-     * Sets chat controller.
-     *
-     * @param chatController the chat controller
-     */
-    public void setChatController(ChatController chatController) {
-        this.chatController = chatController;
     }
 
     /**

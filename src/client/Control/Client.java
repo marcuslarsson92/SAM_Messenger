@@ -40,7 +40,7 @@ public class Client {
 
         // Skicka användarinformation till servern
         out.writeObject(user);
-
+        out.flush();
         new Thread(new Listener()).start();
     }
 
@@ -73,6 +73,7 @@ public class Client {
      */
     public void sendMessage(Message message) throws IOException {
         out.writeObject(message);
+        out.flush();
     }
 
     /**
@@ -113,10 +114,9 @@ public class Client {
         user = new User(username, selectedIcon);
         System.out.println("username: " + username + " selected icon: " + selectedIcon);
 
-        ChatController chatController = new ChatController(this, null);
-        ChatView chatView = new ChatView();
+        ChatController chatController = new ChatController(this);
+        ChatView chatView = new ChatView(chatController);
         chatController.setView(chatView);
-        chatView.setChatController(chatController);
         chatView.setVisible(true);
         view.setVisible(false);
     }

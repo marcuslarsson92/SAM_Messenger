@@ -41,9 +41,9 @@ public class LoginController {
         try {
             client = new Client(user, "localhost", 12345);
             client.setView(view);
-            ChatView chatView = new ChatView();
-            chatController = new ChatController(client, chatView);
-
+            chatController = new ChatController(client);
+            ChatView chatView = new ChatView(chatController);
+            chatController.setView(chatView);
             chatView.setVisible(true);
             view.setVisible(false);
         } catch (IOException ex) {

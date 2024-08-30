@@ -1,4 +1,2 @@
-Username: Theodor
-Iconpath: icons/icon3.png
-Activity Log:
-Theodor received a message from Alex. Message: "Gruppchatt från Alex till Simon Theodor 12,54" Time: 28/08/2024 12:54
+Theodor received a message from Johan. Message: "Hej" Time: 30/08/2024 04:09
+Theodor sent a message to Johan. Message: "Hej" Time: 30/08/2024 04:09

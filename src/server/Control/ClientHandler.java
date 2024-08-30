@@ -58,6 +58,7 @@ public class ClientHandler implements Runnable {
     public void sendUserList(List<User> userList) {
         try {
             out.writeObject(userList);
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -73,6 +74,7 @@ public class ClientHandler implements Runnable {
             // Sätt leveranstid till nuvarande tid
             message.setDeliveredTime(java.time.LocalDateTime.now());
             out.writeObject(message);
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
