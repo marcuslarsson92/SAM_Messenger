@@ -246,6 +246,7 @@ public class ChatController {
 
         // Visa meddelandet i chattfönstret
         chatWindow.receiveMessage(message);
+        playNotificationSound();
 
         // Fokusera fönstret om det inte redan är det
         if (!chatWindow.isFocused()) {
@@ -290,5 +291,8 @@ public class ChatController {
                 e.printStackTrace();
             }
         }
+    }
+    public ChatView getChatView() {
+        return this.chatView;
     }
 }
