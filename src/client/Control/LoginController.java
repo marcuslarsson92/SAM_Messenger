@@ -39,7 +39,7 @@ public class LoginController {
 
         User user = new User(username, selectedIcon);
         try {
-            client = new Client(user, "localhost", 12345);
+            client = new Client(user, "192.168.1.180", 12345);
             client.setView(view);
             chatController = new ChatController(client);
             ChatView chatView = new ChatView(chatController);
