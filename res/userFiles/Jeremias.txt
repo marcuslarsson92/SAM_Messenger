@@ -1,0 +1,2 @@
+Jeremias sent a message to Marcus. Message: "Hej" Time: 05/08/2025 18:22
+Jeremias received a message from Marcus. Message: "null" Time: 05/08/2025 18:23

@@ -7,3 +7,8 @@ Alex sent a message to Simon. Message: "Hej Simon, är du offline? Skickat 03,42
 Marcus sent a message to Simon. Message: "Marcus skickar till Simon, är du offline? Skickar 03.44" Time: 30/08/2024 03:44
 Johan sent a message to Theodor. Message: "Hej" Time: 30/08/2024 04:09
 Theodor sent a message to Johan. Message: "Hej" Time: 30/08/2024 04:09
+Per sent a message to Alex. Message: "Hej" Time: 04/08/2025 23:34
+Alex sent a message to Per. Message: "Tjena" Time: 04/08/2025 23:34
+Alex sent a message to Per. Message: "null" Time: 04/08/2025 23:35
+Jeremias sent a message to Marcus. Message: "Hej" Time: 05/08/2025 18:22
+Marcus sent a message to Jeremias. Message: "null" Time: 05/08/2025 18:23

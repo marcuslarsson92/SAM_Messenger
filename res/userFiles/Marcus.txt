@@ -1,3 +1,5 @@
 Marcus received a message from Alex. Message: "Hej" Time: 30/08/2024 03:36
 Marcus received a message from Alex. Message: "Hejhej" Time: 30/08/2024 03:38
 Marcus sent a message to Simon. Message: "Marcus skickar till Simon, är du offline? Skickar 03.44" Time: 30/08/2024 03:44
+Marcus received a message from Jeremias. Message: "Hej" Time: 05/08/2025 18:22
+Marcus sent a message to Jeremias. Message: "null" Time: 05/08/2025 18:23
